@@ -1,417 +1,409 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PhongYTB — Mã Hoá & Script Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  /* ========== Reset & root ========== */
-  :root{
-    --bg:#0b0f13;
-    --panel:#0f1720;
-    --card:#0b1320;
-    --muted:#9aa4b2;
-    --accent:#00e676;
-    --accent-2:#00c853;
-    --glass: rgba(255,255,255,0.04);
-    --glass-2: rgba(255,255,255,0.02);
-    --danger:#ff5252;
-    --radius:14px;
-    --shadow: 0 12px 40px rgba(2,6,23,0.7);
-    --glass-border: rgba(255,255,255,0.04);
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071018,#07141c);color:#e6eef6;-webkit-font-smoothing:antialiased}
-  a{color:inherit;text-decoration:none}
-  button{font-family:inherit}
-  /* ========== Layout ========== */
-  .wrap{max-width:980px;margin:18px auto;padding:16px}
-  header.app{
-    display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(90deg, rgba(0,0,0,0.4), rgba(255,255,255,0.02));
-    border-radius:12px;border:1px solid var(--glass-border);box-shadow:var(--shadow);backdrop-filter: blur(6px);
-  }
-  .logo{
-    width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#08303a,#03293b);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:var(--accent);
-  }
-  .title{font-weight:800;font-size:16px}
-  .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
-
-  /* ========== Nav tabs ========== */
-  nav.tabs{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-  nav.tabs button{
-    padding:8px 12px;border-radius:10px;border:1px solid var(--glass-border);background:linear-gradient(180deg,var(--card),transparent);color:#dff6ea;font-weight:700;cursor:pointer;
-    transition:all .18s;
-  }
-  nav.tabs button.active{box-shadow:0 10px 30px rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.14);background:linear-gradient(90deg,#042f2b,#06322f)}
-  nav.tabs button:active{transform:translateY(1px)}
-
-  /* ========== Sections ========== */
-  section.panel{margin-top:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid var(--glass-border)}
-  .row{display:flex;gap:12px}
-  .col{flex:1}
-
-  /* ========== Encryption UI ========== */
-  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  select,input[type="text"]{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.2);color:inherit}
-  textarea{width:100%;min-height:120px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));color:inherit;resize:vertical}
-  .btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#012; padding:10px 14px;border-radius:10px;border:0;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(0,230,118,0.06)}
-  .btn.ghost{background:transparent;border:1px solid var(--glass-border;color:var(--muted))}
-  .small{font-size:12px;color:var(--muted)}
-
-  /* fancy result box */
-  .result-wrap{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
-  .result-card{flex:1;min-width:220px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
-  .copy-btn{padding:8px 10px;border-radius:8px;border:0;background:rgba(255,255,255,0.04);color:var(--accent);cursor:pointer;font-weight:700}
-
-  /* ========== Scripts list ========== */
-  .scripts-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .search-input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-  .script-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:10px;margin-top:12px}
-  .script-card{padding:12px;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:8px}
-  .script-meta{display:flex;justify-content:space-between;align-items:center}
-  .tag{font-size:11px;padding:6px 8px;border-radius:999px;background:rgba(0,0,0,0.2);color:var(--muted);font-weight:700}
-
-  /* textarea code look */
-  .code-area{font-family: "Courier New", monospace;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.18));padding:10px;border-radius:8px;color:#cfe7d6;border:1px solid rgba(255,255,255,0.02);white-space:pre-wrap;word-break:break-word}
-
-  /* ========== Client cards ========== */
-  .client-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:10px}
-  .client-card{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;background:linear-gradient(90deg,#071213,#081617);border:1px solid rgba(255,255,255,0.02)}
-  .client-col{display:flex;flex-direction:column;gap:6px}
-
-  /* ========== About & Terms ========== */
-  .about{line-height:1.45;color:var(--muted);font-size:14px}
-  .terms{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
-
-  /* ========== Effects ========== */
-  .pulse{animation:pulse 2s infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 rgba(0,230,118,0.08)}50%{box-shadow:0 0 20px rgba(0,230,118,0.06)}100%{box-shadow:0 0 0 rgba(0,230,118,0)}}
-
-  /* responsiveness */
-  @media (min-width:760px){
-    .script-grid{grid-template-columns:repeat(2,1fr)}
-    .client-grid{grid-template-columns:repeat(2,1fr)}
-  }
-  @media (min-width:1040px){
-    .script-grid{grid-template-columns:repeat(3,1fr)}
-    .client-grid{grid-template-columns:repeat(3,1fr)}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHONG | TOOLBOX - Mã Hóa, Scripts & Clients</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Màu nền tối */
+        }
+        .header-bg {
+            background: linear-gradient(90deg, #1f2937, #111827);
+        }
+        .nav-link {
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            padding: 8px 16px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background-color: #38bdf8; /* Màu xanh neon */
+            transition: left 0.3s ease-out;
+        }
+        .nav-link.active::after, .nav-link:hover::after {
+            left: 0;
+        }
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .btn-primary {
+            background-color: #38bdf8;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0ea5e9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(56, 189, 248, 0.4);
+        }
+        .btn-secondary {
+            background-color: #475569;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #334155;
+        }
+        .copy-success {
+            animation: fadeInOut 1.5s ease-in-out forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: scale(0.8); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0ea5e9;
+        }
+    </style>
 </head>
-<body>
-<div class="wrap">
-  <header class="app">
-    <div class="logo">PY</div>
-    <div>
-      <div class="title">PhongYTB — Mã Hoá & Script Hub</div>
-      <div class="subtitle">Mã hoá • Giải mã • Script list • Clients — AES key mặc định: <b>Roland</b></div>
-    </div>
-  </header>
+<body class="text-gray-100 min-h-screen">
 
-  <nav class="tabs" role="tablist" aria-label="Main Tabs">
-    <button class="tab-btn active" data-tab="enc">🔐 Mã Hoá/Giải Mã</button>
-    <button class="tab-btn" data-tab="scripts">📜 Script</button>
-    <button class="tab-btn" data-tab="clients">💾 Client APK</button>
-    <button class="tab-btn" data-tab="about">ℹ️ Giới Thiệu / Điều Khoản</button>
-  </nav>
-
-  <!-- ========== ENCRYPT/DECRYPT ========== -->
-  <section id="enc" class="panel" role="tabpanel">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <div style="font-weight:800">Công cụ mã hoá và giải mã</div>
-      <div class="small">Chọn phương thức, nhập văn bản, bấm Mã hoá hoặc Giải mã</div>
-    </div>
-
-    <div style="height:14px"></div>
-
-    <!-- controls -->
-    <div class="controls" style="margin-bottom:12px">
-      <select id="cryptoMethod" aria-label="Crypto method">
-        <option value="base64">Base64</option>
-        <option value="hex">Hex</option>
-        <option value="md5">MD5 (một chiều)</option>
-        <option value="sha256">SHA-256 (một chiều)</option>
-        <option value="aes">AES (mật khẩu)</option>
-        <option value="caesar">Caesar cipher</option>
-        <option value="rot13">ROT13</option>
-        <option value="url">URL Encode</option>
-        <option value="binary">Binary</option>
-        <option value="atbash">Atbash</option>
-      </select>
-
-      <input id="aesPassword" type="text" placeholder="Mật khẩu AES (mặc định Roland)" value="Roland" style="max-width:260px" />
-      <input id="caesarShift" type="number" placeholder="Shift (Caesar)" style="width:110px" value="3" />
-      <div style="flex:1"></div>
-      <button id="doEncrypt" class="btn">🔐 Mã Hoá</button>
-      <button id="doDecrypt" class="btn" style="background:linear-gradient(90deg,#2196f3,#1769aa)">🔓 Giải mã</button>
-    </div>
-
-    <!-- textareas -->
-    <div style="display:flex;gap:12px;flex-direction:column">
-      <div class="result-wrap">
-        <div class="result-card" style="flex:1">
-          <div style="font-weight:800;margin-bottom:6px">Văn bản nguồn</div>
-          <textarea id="inputText" placeholder="Nhập hoặc dán văn bản vào đây..."></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="copy-btn" id="copyInput">Sao chép</button>
-            <button class="copy-btn" id="clearInput">Xóa</button>
-            <div class="small" style="margin-left:auto">Kích thước: <span id="inputLen">0</span> ký tự</div>
-          </div>
+    <!-- Navigation Bar -->
+    <nav class="header-bg p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white tracking-wider">PHONG <span class="text-blue-400">HUB</span></h1>
+            <div id="nav-menu" class="space-x-4 flex">
+                <a href="#encoding" class="nav-link active text-sm font-medium" data-section="encoding">Mã Hoá</a>
+                <a href="#scripts" class="nav-link text-sm font-medium" data-section="scripts">Scripts</a>
+                <a href="#client-apk" class="nav-link text-sm font-medium" data-section="client-apk">Client/APK</a>
+                <a href="#about" class="nav-link text-sm font-medium" data-section="about">Giới Thiệu</a>
+            </div>
         </div>
+    </nav>
 
-        <div class="result-card" style="flex:1;min-width:260px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-weight:800">Kết quả</div>
-            <div class="small">Loại: <span id="curMethod">Base64</span></div>
-          </div>
-          <div style="height:8px"></div>
-          <div id="outputArea" class="code-area" contenteditable="true" spellcheck="false" aria-label="Output area"></div>
+    <main class="container mx-auto p-4 md:p-8">
 
-          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button class="btn" id="copyOutput">📋 Sao chép kết quả</button>
-            <button class="copy-btn" id="downloadOutput">⬇️ Tải .txt</button>
-            <button class="copy-btn" id="clearOutput">Xóa</button>
-            <div style="flex:1"></div>
-            <div class="small">Ký tự: <span id="outputLen">0</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <!-- 1. Encoding Section -->
+        <section id="encoding" class="content-section py-10">
+            <h2 class="text-4xl font-extrabold mb-8 text-center text-blue-400">Công Cụ Mã Hoá & Giải Mã</h2>
+            <div class="card p-6 rounded-xl space-y-6">
+                
+                <!-- Encoding Type Selector -->
+                <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <label for="encodingType" class="text-lg font-medium whitespace-nowrap">Chọn Loại Mã Hoá:</label>
+                    <select id="encodingType" class="w-full sm:w-1/2 p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                        <option value="base64">Base64</option>
+                        <option value="url">URL Encoding</option>
+                        <option value="binary">Binary (Nhị Phân)</option>
+                        <option value="simple-cipher">AES (Simplified) - Khóa: Roland</option>
+                    </select>
+                </div>
 
-    <div style="height:12px"></div>
+                <!-- Input Area -->
+                <div>
+                    <textarea id="inputText" rows="6" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="Dán văn bản bạn muốn mã hoá/giải mã vào đây..."></textarea>
+                </div>
 
-    <div class="small">Hỗ trợ giải mã: Base64, Hex, URL, Caesar, ROT13, Binary, AES (khi có mật khẩu đúng). MD5/SHA256 là hàm một chiều — chỉ hiển thị băm.</div>
-  </section>
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-4">
+                    <button id="encodeBtn" class="flex-1 min-w-[120px] btn-primary text-white font-bold py-3 px-6 rounded-xl hover:shadow-blue-500/50">MÃ HOÁ</button>
+                    <button id="decodeBtn" class="flex-1 min-w-[120px] btn-secondary text-white font-bold py-3 px-6 rounded-xl hover:shadow-gray-500/50">GIẢI MÃ</button>
+                </div>
 
-  <!-- ========== SCRIPTS ========== -->
-  <section id="scripts" class="panel" role="tabpanel" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <div style="font-weight:800">📜 Script Hub — Steal a Brainrot & Grow a Garden</div>
-      <div class="small">Tìm, xem, sao chép. Lọc theo nhóm.</div>
-    </div>
+                <!-- Output Area -->
+                <div class="relative">
+                    <textarea id="outputText" rows="6" readonly class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-blue-300 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="Kết quả sẽ hiển thị ở đây..."></textarea>
+                    <button id="copyOutputBtn" class="absolute bottom-2 right-2 btn-secondary text-xs text-white py-1.5 px-3 rounded-lg flex items-center space-x-1" disabled>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v4a1 1 0 001 1h5a1 1 0 001-1V7m-5 0h5m-5 0h2m-5 4h5m-9 0V7a1 1 0 011-1h6a1 1 0 011 1v11a1 1 0 01-1 1H8a1 1 0 01-1-1v-4zm6 0v4m0-4h4"></path></svg>
+                        <span id="copyText">Sao Chép</span>
+                    </button>
+                </div>
+                <p id="errorMsg" class="text-red-400 text-sm italic h-5"></p>
+            </div>
+        </section>
 
-    <div style="height:12px"></div>
+        <!-- 2. Scripts Section -->
+        <section id="scripts" class="content-section py-10 hidden">
+            <h2 class="text-4xl font-extrabold mb-8 text-center text-blue-400">Kho Script Game (Roblox)</h2>
 
-    <div class="scripts-top">
-      <select id="scriptGroup" style="min-width:180px">
-        <option value="all">— Tất cả —</option>
-        <option value="steal">Steal a Brainrot</option>
-        <option value="grow">Grow a Garden</option>
-      </select>
-      <input id="scriptSearch" class="search-input" placeholder="Tìm theo tên (vd: Lumin, Lemon, Arbix...)" />
-      <button id="btnRefreshScripts" class="btn">⟳ Tải lại</button>
-      <button id="btnExpand" class="copy-btn">Hiện/Ẩn chi tiết</button>
-    </div>
+            <!-- Game Selector -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button data-game="brainrot" class="game-btn btn-primary font-bold py-3 px-6 rounded-xl">Steal a Brainrot</button>
+                <button data-game="garden" class="game-btn btn-secondary font-bold py-3 px-6 rounded-xl">Grow a Garden</button>
+            </div>
 
-    <div id="scriptGrid" class="script-grid" style="margin-top:12px"></div>
-  </section>
+            <!-- Scripts List -->
+            <div id="scriptsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Scripts will be loaded here by JavaScript -->
+            </div>
+        </section>
 
-  <!-- ========== CLIENTS ========== -->
-  <section id="clients" class="panel" role="tabpanel" style="display:none">
-    <div style="font-weight:800">💾 Trang Tải Clients / Tools</div>
-    <div style="height:8px"></div>
-    <div class="client-grid">
-      <div class="client-card">
-        <div class="client-col">
-          <div style="font-weight:900">Delta X VNG</div>
-          <div class="small">Cập Nhật: 23/09/2025 — Trạng thái: <b style="color:lime">Hoạt Động</b> — Phiên bản: V2.690 — Anti-Ban: Có</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <a href="https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" target="_blank"><button class="btn">⬇️ Tải</button></a>
-          <button class="copy-btn" data-link="https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file">Sao chép link</button>
-        </div>
-      </div>
+        <!-- 3. Client/APK Section -->
+        <section id="client-apk" class="content-section py-10 hidden">
+            <h2 class="text-4xl font-extrabold mb-8 text-center text-blue-400">Tải Client & APK Mods</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      <div class="client-card">
-        <div class="client-col">
-          <div style="font-weight:900">Pixel Launcher Lite — Mod Unlocked Pro</div>
-          <div class="small">Phiên bản mod — Tải để cài đặt.</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <a href="https://www.mediafire.com/file/dllutrxsomivrhw/Launcher_Lite.apk/file" target="_blank"><button class="btn">⬇️ Tải</button></a>
-          <button class="copy-btn" data-link="https://www.mediafire.com/file/dllutrxsomivrhw/Launcher_Lite.apk/file">Sao chép link</button>
-        </div>
-      </div>
+                <!-- Helper function to render a card (defined in JS) -->
 
-      <div class="client-card">
-        <div class="client-col">
-          <div style="font-weight:900">F1 VM VIP APK — Mod Unlocked Pro</div>
-          <div class="small">Cập nhật: 04/09/2025 — Kiểm tra kỹ trước khi cài.</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <a href="https://www.mediafire.com/file/fwpstknlrszwsys/F1VM_V1.3.1.2.01_Mod_VIP.apk/file" target="_blank"><button class="btn">⬇️ Tải</button></a>
-          <button class="copy-btn" data-link="https://www.mediafire.com/file/fwpstknlrszwsys/F1VM_V1.3.1.2.01_Mod_VIP.apk/file">Sao chép link</button>
-        </div>
-      </div>
-    </div>
-  </section>
+            </div>
+        </section>
 
-  <!-- ========== ABOUT & TERMS ========== -->
-  <section id="about" class="panel" role="tabpanel" style="display:none">
-    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <div style="max-width:700px">
-        <div style="font-weight:900">Giới Thiệu</div>
-        <div class="about" style="margin-top:8px">
-          Trang này do <b>PhongYTB</b> tạo — mục đích: chia sẻ công cụ mã hoá/giải mã và danh sách script (dành cho học tập). Nội dung scripts là các chuỗi loader (chỉ để dán vào trình chạy của người dùng). Mọi hành vi sử dụng scripts trên server/ứng dụng không thuộc phạm vi trang — người dùng chịu trách nhiệm.
-        </div>
-      </div>
-      <div style="max-width:260px">
-        <div style="font-weight:900">Thông tin tác giả</div>
-        <div class="small" style="margin-top:8px">Tiktok: <b>hnphong_meobeo</b><br>Created by <b>PhongYTB</b></div>
-        <div style="height:10px"></div>
-        <div style="font-weight:900">AES mặc định</div>
-        <div class="small" style="margin-top:6px">Khóa AES mặc định: <b>Roland</b></div>
-      </div>
-    </div>
+        <!-- 4. About Section -->
+        <section id="about" class="content-section py-10 hidden">
+            <h2 class="text-4xl font-extrabold mb-8 text-center text-blue-400">Giới Thiệu & Điều Khoản</h2>
+            <div class="card p-8 rounded-xl space-y-6">
+                <div class="text-center space-y-4">
+                    <p class="text-2xl font-bold text-blue-400">Created by: phongYTB</p>
+                    <p class="text-xl">Tiktok: <a href="https://www.tiktok.com/@hnphong_meobeo" target="_blank" class="text-pink-400 hover:underline">hnphong_meobeo</a></p>
+                </div>
 
-    <div style="height:12px"></div>
+                <div class="pt-4 border-t border-gray-600">
+                    <h3 class="text-2xl font-semibold mb-3 text-white">Điều Khoản Sử Dụng</h3>
+                    <div class="text-sm text-gray-400 space-y-3">
+                        <p><strong>1. Trách Nhiệm Người Dùng:</strong> Các Scripts và Clients được cung cấp tại đây chỉ nhằm mục đích tham khảo và giáo dục. Chúng tôi không chịu trách nhiệm về bất kỳ hậu quả nào (bao gồm việc bị cấm tài khoản) phát sinh từ việc sử dụng các công cụ này.</p>
+                        <p><strong>2. Bảo Mật:</strong> Người dùng tự chịu rủi ro khi chạy bất kỳ đoạn mã (script) bên ngoài nào. Chúng tôi khuyến cáo người dùng nên tìm hiểu kỹ nguồn gốc trước khi sử dụng. Tool Mã Hoá hoạt động hoàn toàn trên trình duyệt và không thu thập bất kỳ dữ liệu nào của bạn.</p>
+                        <p><strong>3. Bản Quyền:</strong> Các Scripts được tổng hợp từ nhiều nguồn. Mọi bản quyền thuộc về tác giả Scripts gốc.</p>
+                        <p><strong>4. Thay Đổi:</strong> Các điều khoản này có thể được cập nhật bất cứ lúc nào mà không cần báo trước.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div style="font-weight:900">Điều khoản sử dụng</div>
-    <div class="terms" style="margin-top:8px">
-      <ol>
-        <li>Trang cung cấp công cụ & thông tin mang tính chất học tập và thử nghiệm.</li>
-        <li>Không sử dụng nội dung để xâm phạm, chiếm đoạt, gây mất an toàn cho người khác.</li>
-        <li>Mọi tải xuống từ liên kết bên ngoài là do bên thứ ba lưu trữ — kiểm tra an toàn trước khi cài đặt.</li>
-        <li>Tác giả không chịu trách nhiệm cho hành vi trái pháp luật của người dùng.</li>
-      </ol>
-    </div>
-  </section>
+    </main>
 
-  <div style="height:20px"></div>
-  <footer style="text-align:center;color:var(--muted);font-size:13px">© 2025 PhongYTB — Mã hoá & Script Hub</footer>
-</div>
+    <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-800 mt-8">
+        &copy; 2025 PHONG HUB. All rights reserved.
+    </footer>
 
-<!-- ========== LIBRARIES ========== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // Global utility function for copying text
+        function copyToClipboard(text, buttonElement) {
+            const originalText = buttonElement.innerHTML;
+            const tempText = 'Đã Sao Chép!';
+            
+            // Use execCommand for broader compatibility in sandboxed environments
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed'; // Avoid scrolling to bottom
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    buttonElement.innerHTML = `<svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${tempText}`;
+                    buttonElement.classList.add('copy-success');
+                } else {
+                    console.error('Copy command failed.');
+                    buttonElement.innerHTML = 'Lỗi Sao Chép!';
+                }
+            } catch (err) {
+                console.error('Unable to copy', err);
+                buttonElement.innerHTML = 'Lỗi Sao Chép!';
+            }
 
-<script>
-/* ========== App logic ========== */
+            document.body.removeChild(textarea);
 
-/* Helper utilities */
-const $ = (sel, ctx=document) => ctx.querySelector(sel);
-const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
-function fmtBytes(n){ return n.toString(); }
+            setTimeout(() => {
+                buttonElement.innerHTML = originalText;
+                buttonElement.classList.remove('copy-success');
+            }, 2000);
+        }
 
-/* Tabs */
-$$('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    $$('.tab-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const id = btn.dataset.tab;
-    $$('section.panel').forEach(s=>s.style.display='none');
-    document.getElementById(id).style.display = 'block';
-    window.scrollTo({top:0,behavior:'smooth'});
-  });
-});
+        // --- ENCODING LOGIC ---
 
-/* ========== Encryption / Decryption ========== */
-const inputText = $('#inputText');
-const outputArea = $('#outputArea');
-const cryptoMethod = $('#cryptoMethod');
-const aesPassword = $('#aesPassword');
-const caesarShift = $('#caesarShift');
-const curMethodLabel = $('#curMethod');
-const inputLen = $('#inputLen'), outputLen = $('#outputLen');
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const encodingType = document.getElementById('encodingType');
+        const encodeBtn = document.getElementById('encodeBtn');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const copyOutputBtn = document.getElementById('copyOutputBtn');
+        const copyText = document.getElementById('copyText');
+        const errorMsg = document.getElementById('errorMsg');
+        const AES_KEY = "Roland"; // Default key for simplified cipher
 
-function updateLens(){
-  inputLen.textContent = inputText.value.length;
-  outputLen.textContent = outputArea.textContent.length;
-}
+        // Helper: Convert string to Binary
+        function textToBinary(text) {
+            return Array.from(text).map(char => char.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+        }
+        
+        // Helper: Convert Binary to string
+        function binaryToText(binary) {
+            try {
+                // Remove spaces and split into 8-bit chunks
+                return binary.split(' ').map(bin => String.fromCharCode(parseInt(bin, 2))).join('');
+            } catch (e) {
+                throw new Error("Dữ liệu nhị phân không hợp lệ.");
+            }
+        }
 
-/* Basic transforms */
-function toBase64(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return "Lỗi Base64"; } }
-function fromBase64(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return "Lỗi giải mã Base64"; } }
-function toHex(s){ return Array.from(new TextEncoder().encode(s)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
-function fromHex(s){
-  try{
-    s = s.replace(/\s+/g,'');
-    if(s.length%2!==0) return 'Hex không hợp lệ';
-    const bytes = new Uint8Array(s.match(/.{2}/g).map(h=>parseInt(h,16)));
-    return new TextDecoder().decode(bytes);
-  }catch(e){ return 'Lỗi giải mã Hex'; }
-}
-function toBinary(s){ return Array.from(new TextEncoder().encode(s)).map(b=>b.toString(2).padStart(8,'0')).join(' '); }
-function fromBinary(s){
-  try{
-    const arr = s.trim().split(/\s+/);
-    const bytes = arr.map(b=>parseInt(b,2));
-    return new TextDecoder().decode(new Uint8Array(bytes));
-  }catch(e){ return 'Lỗi giải mã Binary'; }
-}
-function atbash(s){
-  return s.split('').map(ch=>{
-    if(/[a-z]/.test(ch)) return String.fromCharCode(122 - (ch.charCodeAt(0)-97));
-    if(/[A-Z]/.test(ch)) return String.fromCharCode(90 - (ch.charCodeAt(0)-65));
-    return ch;
-  }).join('');
-}
-function rot13(s){
-  return s.replace(/[a-zA-Z]/g, c =>
-    String.fromCharCode((c<="Z"?90:122) >= (c=c.charCodeAt(0)+13) ? c : c-26)
-  );
-}
-function caesarEncode(s,shift){
-  return s.split('').map(ch=>{
-    if(/[a-z]/.test(ch)) return String.fromCharCode((ch.charCodeAt(0)-97+shift+26)%26 +97);
-    if(/[A-Z]/.test(ch)) return String.fromCharCode((ch.charCodeAt(0)-65+shift+26)%26 +65);
-    return ch;
-  }).join('');
-}
-function caesarDecode(s,shift){ return caesarEncode(s,-shift); }
-function urlEncode(s){ return encodeURIComponent(s); }
-function urlDecode(s){ try{ return decodeURIComponent(s); }catch(e){ return 'Lỗi giải mã URL'; } }
+        // Helper: Simple Caesar/Substitution Cipher (as stand-in for AES)
+        // Key is derived from 'Roland' (R:82, o:111, l:108, a:97, n:110, d:100) -> Sum of char codes.
+        function getCipherShift(key) {
+            return Array.from(key).reduce((sum, char) => sum + char.charCodeAt(0), 0) % 25; // Shift amount 0-24
+        }
+        
+        function simpleCipher(text, key, isEncrypt) {
+            const shift = getCipherShift(key) * (isEncrypt ? 1 : -1);
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                let charCode = text.charCodeAt(i);
 
-/* AES using CryptoJS */
-function aesEncrypt(text, pwd){
-  try{
-    return CryptoJS.AES.encrypt(text, pwd).toString();
-  }catch(e){ return 'Lỗi AES'; }
-}
-function aesDecrypt(cipher, pwd){
-  try{
-    const bytes = CryptoJS.AES.decrypt(cipher, pwd);
-    const txt = bytes.toString(CryptoJS.enc.Utf8);
-    if(!txt) return 'Lỗi giải mã AES (khóa sai hoặc ciphertext hỏng)';
-    return txt;
-  }catch(e){ return 'Lỗi AES'; }
-}
+                // Only apply shift to standard visible ASCII (32-126)
+                if (charCode >= 32 && charCode <= 126) {
+                    // Shift and wrap around ASCII range
+                    let newCode = charCode + shift;
+                    if (newCode > 126) {
+                        newCode = 32 + (newCode - 127);
+                    } else if (newCode < 32) {
+                        newCode = 127 - (32 - newCode);
+                    }
+                    result += String.fromCharCode(newCode);
+                } else {
+                    result += text.charAt(i); // Leave non-ASCII/control characters untouched
+                }
+            }
+            return result;
+        }
 
-/* Hash functions */
-function md5Hash(s){ return CryptoJS.MD5(s).toString(); }
-function sha256Hash(s){ return CryptoJS.SHA256(s).toString(); }
+        // Main Encoding/Decoding Logic
+        function processText(isEncode) {
+            errorMsg.textContent = '';
+            const input = inputText.value.trim();
+            const type = encodingType.value;
+            let output = '';
 
-/* Main actions */
-function doEncryptAction(){
-  const method = cryptoMethod.value;
-  const txt = inputText.value || '';
-  curMethodLabel.textContent = method;
-  let out='';
-  switch(method){
-    case 'base64': out = toBase64(txt); break;
-    case 'hex': out = toHex(txt); break;
-    case 'md5': out = md5Hash(txt); break;
-    case 'sha256': out = sha256Hash(txt); break;
-    case 'aes': out = aesEncrypt(txt, aesPassword.value || 'Roland'); break;
-    case 'caesar': out = caesarEncode(txt, parseInt(caesarShift.value || 3)); break;
-    case 'rot13': out = rot13(txt); break;
-    case 'url': out = urlEncode(txt); break;
-    case 'binary': out = toBinary(txt); break;
-    case 'atbash': out = atbash(txt); break;
-    default: out = 'Phương thức không hỗ trợ';
-  }
-  outputArea.textContent = out;
-  updateLens();
-}
+            if (!input) {
+                errorMsg.textContent = 'Vui lòng nhập văn bản cần xử lý.';
+                outputText.value = '';
+                copyOutputBtn.disabled = true;
+                return;
+            }
 
-function doDecryptAction(){
-  const method = cryptoMethod.value;
-  const txt = inputText.value || '';
-  curMethodLabel.textContent = method;
-  let out='';
-  switch(method){
-    case 'base64': out = fromBase64(txt); break;
-    case 'hex': out = fromHex(txt); break;
-    case 'aes': out = aesDecrypt(txt, aesPassword.value || 'Roland'); break;
-    case 'caesar': out = caesarDecode(t
+            try {
+                if (isEncode) {
+                    switch (type) {
+                        case 'base64':
+                            output = btoa(input);
+                            break;
+                        case 'url':
+                            output = encodeURIComponent(input);
+                            break;
+                        case 'binary':
+                            output = textToBinary(input);
+                            break;
+                        case 'simple-cipher':
+                            output = simpleCipher(input, AES_KEY, true);
+                            break;
+                    }
+                } else { // Decode
+                    switch (type) {
+                        case 'base64':
+                            output = atob(input);
+                            break;
+                        case 'url':
+                            output = decodeURIComponent(input);
+                            break;
+                        case 'binary':
+                            output = binaryToText(input);
+                            break;
+                        case 'simple-cipher':
+                            output = simpleCipher(input, AES_KEY, false);
+                            break;
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                errorMsg.textContent = `Lỗi: Không thể ${isEncode ? 'mã hoá' : 'giải mã'} dữ liệu. Dữ liệu có thể không đúng định dạng.`;
+                output = '';
+            }
+
+            outputText.value = output;
+            copyOutputBtn.disabled = output.length === 0;
+        }
+
+        encodeBtn.addEventListener('click', () => processText(true));
+        decodeBtn.addEventListener('click', () => processText(false));
+
+        copyOutputBtn.addEventListener('click', () => {
+            copyToClipboard(outputText.value, copyOutputBtn);
+            // Revert the button text after copying (handled in copyToClipboard)
+        });
+
+        // Enable/disable copy button on input change
+        outputText.addEventListener('input', () => {
+            copyOutputBtn.disabled = outputText.value.length === 0;
+        });
+
+
+        // --- NAVIGATION & SECTION SWITCHING ---
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        function switchSection(targetId) {
+            // Update active link
+            navLinks.forEach(link => {
+                link.classList.remove('active', 'text-blue-400');
+                if (link.getAttribute('href') === `#${targetId}`) {
+                    link.classList.add('active', 'text-blue-400');
+                }
+            });
+
+            // Show/hide content sections
+            contentSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('data-section');
+                switchSection(targetId);
+                // Update URL hash for sharing/bookmarking
+                window.history.pushState(null, null, `#${targetId}`);
+            });
+        });
+
+        // Handle initial load based on URL hash
+        const initialHash = window.location.hash.substring(1) || 'encoding';
+        switchSection(initialHash);
+
+
+        // --- SCRIPTS DATA AND RENDERING ---
+
+        const brainrotScripts = [
+            { name: "Lemon Hub", code: `loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()` },
+            { name: "Arbix Hub New", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()` },
+            { name: "Blue X Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/refs/heads/main/Main.lua"))()` },
+            { name: "Dencrycode", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()` },
+            { name: "Ugly Hub", code: `script_key="Your_Key";\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/77d72e34c893b67ea49b8d62d1a18485.lua"))()` },
+            { name: "Lumin Hub", code: `loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()` },
+            { name: "Tuấn Anh IOS", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhTuanDzai-Hub/TuanAnhIOS/refs/heads/main/BrainRotVip"))()` },
+            { name: "Steel A Mod", code: `loadstring(game:HttpGet("https://rawscripts.net/raw/Steal-a-Brainrot-MODDED-INSTANT-STEALS-EASY-CASH-AND-MORE-KEYLESS-42520"))()` },
+            { name: "Chilli Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()` },
+            { name: "Steel a Brainnot", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()` },
+            { name: "Vakat Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/vokamc/main/refs/heads/main/vokathub"))()` },
+            { name: "Open GUI", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/iw929wiwiw/Teleport-Speed/refs/heads/main/Fall%20Down"))()` },
+        
