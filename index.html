@@ -3,374 +3,460 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Toolbox — Scripts, Mã hoá & Client (Mobile UI)</title>
+<title>PhongYTB — Mã Hoá & Script Hub (Mobile)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0f1724;
-    --surface:#0b1220;
-    --card:#0f1726;
-    --muted:#9aa4b2;
-    --accent:#ff6a2a;
-    --success:#10b981;
-    --glass: rgba(255,255,255,0.04);
-    --radius:14px;
-    --shadow: 0 12px 36px rgba(2,6,23,0.6);
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    color-scheme: dark;
+    --bg:#0b0f12;
+    --panel:#0f1720;
+    --muted:#98a0a6;
+    --accent:#00e08a;
+    --accent-2:#00b375;
+    --glass: rgba(255,255,255,0.03);
+    --card-radius:14px;
+    --shadow: 0 10px 30px rgba(2,6,23,0.6);
+    --glass-2: rgba(255,255,255,0.02);
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#07101a,#08121b);color:#e6eef8;-webkit-font-smoothing:antialiased}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#050607,#071218);font-family:Inter,system-ui,Arial;color:#e6eef0;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
   button{font-family:inherit}
-  /* Top nav */
-  .app{
-    max-width:980px;margin:14px auto;padding:14px;
+
+  /* top */
+  header.sitebar{
+    position:sticky;top:0;z-index:1200;
+    backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, rgba(7,14,20,0.6), rgba(5,10,14,0.55));
+    border-bottom:1px solid rgba(255,255,255,0.03);
   }
-  .top{
-    display:flex;align-items:center;gap:12px;margin-bottom:12px;
-  }
-  .logo{
-    width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#111,#222);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.04)
-  }
-  .logo img{width:86%;height:86%;object-fit:contain}
-  .title{
-    flex:1;
-  }
-  .title h1{margin:0;font-size:18px;letter-spacing:0.3px}
-  .title p{margin:0;color:var(--muted);font-size:12px}
-  .tabs{display:flex;gap:8px}
-  .tab-btn{background:transparent;border:1px solid transparent;padding:8px 12px;border-radius:10px;color:var(--muted);font-weight:700;cursor:pointer}
-  .tab-btn.active{background:linear-gradient(90deg,var(--accent),#ff4b07);color:#fff;box-shadow:0 8px 30px rgba(255,106,42,0.12)}
-  /* container */
-  .card{
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:var(--shadow);
-  }
+  .top-inner{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-logo{width:44px;height:44px;border-radius:10px;overflow:hidden;background:linear-gradient(120deg,#0a0f16,#18323a);display:flex;align-items:center;justify-content:center}
+  .brand-logo img{width:100%;height:100%;object-fit:cover}
+  .brand h1{font-size:16px;margin:0;font-weight:800;letter-spacing:0.6px}
+  .brand p{margin:0;font-size:11px;color:var(--muted);margin-top:2px}
+
+  .nav-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .tab-btn{background:transparent;border:0;color:var(--muted);padding:8px 10px;border-radius:10px;font-weight:700}
+  .tab-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041617;box-shadow:0 8px 30px rgba(0,224,138,0.08)}
+  .hambtn{display:none}
+
   /* layout */
-  .content{margin-top:12px;display:grid;grid-template-columns:1fr;gap:12px}
-  /* scripts list */
-  .row{display:flex;gap:10px;align-items:center}
-  .searchbar{display:flex;gap:8px}
-  .input, textarea, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:10px;color:#eaf4ff;width:100%}
-  textarea{min-height:96px;resize:vertical}
-  .btn{background:var(--accent);color:#fff;padding:9px 12px;border-radius:10px;border:0;font-weight:800;cursor:pointer}
-  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer}
-  .small{font-size:13px;color:var(--muted)}
-  /* scripts area */
-  .scripts-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
-  .script-card{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
-  .script-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .script-title{font-weight:800}
-  .script-actions{display:flex;gap:8px}
-  .copy-btn{background:linear-gradient(90deg,#0ea5ff,#00b4ff);color:#001;padding:8px 10px;border-radius:8px;border:0;font-weight:800;cursor:pointer}
-  .disabled{opacity:0.45;pointer-events:none}
+  main{max-width:980px;margin:18px auto;padding:12px}
+  .panel{background:linear-gradient(180deg,var(--panel),#0b1320);border-radius:var(--card-radius);padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:var(--shadow);margin-bottom:14px}
+  .title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .title h2{margin:0;font-size:16px}
+  .muted{color:var(--muted);font-size:13px}
+
   /* encrypt area */
-  .flex{display:flex;gap:10px;align-items:center}
-  .encode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .result-box{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,0.03);min-height:64px;white-space:pre-wrap}
-  /* client area */
-  .client-grid{display:grid;grid-template-columns:1fr;gap:8px}
-  .client-item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
-  .pill-status{padding:6px 10px;border-radius:999px;font-weight:800}
-  .status-on{background:rgba(16,185,129,0.12);color:var(--success);border:1px solid rgba(16,185,129,0.12)}
-  .status-off{background:rgba(239,68,68,0.06);color:#fb7185;border:1px solid rgba(239,68,68,0.06)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .full{grid-column:1/-1}
+  .control-row{display:flex;gap:8px;align-items:center}
+  select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef0;font-size:14px}
+  textarea{min-height:110px;resize:vertical}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:0;color:#041617;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(0,224,138,0.06)}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+  .small{font-size:13px;color:var(--muted)}
+
+  /* scripts */
+  .script-list{display:grid;grid-template-columns:1fr;gap:10px}
+  .script-card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:8px}
+  .script-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .script-name{font-weight:800}
+  .script-code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;background:rgba(0,0,0,0.25);padding:8px;border-radius:6px;color:#cfece4;overflow:auto;font-size:13px}
+  .script-row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+  .searchbar{display:flex;gap:8px}
+
+  /* clients */
+  .clients{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .client-card{border-radius:10px;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border:1px solid rgba(255,255,255,0.03)}
+  .client-card h4{margin:0}
+  .client-meta{font-size:13px;color:var(--muted);margin-top:6px}
+  .client-btn{margin-top:8px;display:inline-block}
+
+  /* modal */
+  .modal-back{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:2000;padding:18px}
+  .modal{width:100%;max-width:740px;border-radius:12px;padding:18px;background:linear-gradient(180deg,#071017,#0d1620);border:1px solid rgba(255,255,255,0.03)}
+  .modal .script-code{max-height:320px}
+
   /* footer */
-  .footer{margin-top:16px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
+  footer{max-width:980px;margin:10px auto 48px;padding:8px 12px;color:var(--muted);font-size:13px;text-align:center}
+
+  /* flying success */
+  .success-block{display:flex;flex-direction:column;align-items:center;gap:10px;background:linear-gradient(180deg,#061716,#082822);padding:12px;border-radius:10px;border:1px solid rgba(0,255,150,0.06)}
+
   /* responsive */
-  @media (max-width:720px){
-    .encode-grid{grid-template-columns:1fr}
+  @media (max-width:880px){
+    .grid{grid-template-columns:1fr}
+    .clients{grid-template-columns:1fr}
+    .nav-actions .tab-btn{padding:8px 8px;font-size:13px}
+    .hambtn{display:block}
   }
-  /* subtle transitions */
-  .fade-enter{opacity:0;transform:translateY(6px)}
-  .fade-enter-active{transition:all .28s ease;opacity:1;transform:none}
-  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
 </style>
 </head>
 <body>
-  <div class="app">
-    <div class="top">
-      <div class="logo"><img src="https://i.postimg.cc/fL1QsjnD/images.png" alt="logo"/></div>
-      <div class="title">
-        <h1>Toolbox — Scripts & Mã hoá</h1>
-        <p class="small">Scripts manager • Mã hoá & Giải mã • Client downloads</p>
-      </div>
-      <div class="tabs" role="tablist" aria-label="tabs">
-        <button class="tab-btn active" data-tab="scripts">Script</button>
-        <button class="tab-btn" data-tab="encode">Mã hoá</button>
-        <button class="tab-btn" data-tab="client">Client</button>
+
+<header class="sitebar">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-logo"><img src="https://i.postimg.cc/fL1QsjnD/images.png" alt="logo"></div>
+      <div>
+        <h1>PhongYTB</h1>
+        <p class="muted">Mã Hoá • Script • Client</p>
       </div>
     </div>
 
-    <!-- main content -->
-    <div id="content" class="content">
-      <!-- SCRIPTS TAB -->
-      <div id="scripts" class="card tab-panel">
-        <div class="row" style="justify-content:space-between;align-items:flex-start">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;gap:8px;margin-bottom:8px">
-              <input id="scriptSearch" class="input" placeholder="Tìm script (tìm theo prefix: ví dụ 'ug', 'lemon', 'arbix')" />
-              <button id="btnClearSearch" class="ghost">X</button>
-            </div>
-            <div class="small">Tìm theo chữ đầu (prefix). Ví dụ gõ "Lennon" hoặc "Le" sẽ tìm những script bắt đầu bằng "Le..."</div>
-          </div>
-          <div style="width:220px">
-            <div class="small">Dán script (hoặc mô tả) — có thể chỉnh trước khi sao chép</div>
-            <textarea id="scriptEditor" placeholder="// Paste script here..."></textarea>
-            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-              <button id="btnPasteEditor" class="ghost">Dán nhanh</button>
-              <button id="btnCopyEditor" class="btn">Sao chép</button>
-            </div>
-          </div>
-        </div>
+    <div class="nav-actions" role="tablist">
+      <button class="tab-btn active" data-tab="encrypt">Mã Hoá</button>
+      <button class="tab-btn" data-tab="scripts">Script</button>
+      <button class="tab-btn" data-tab="client">Client</button>
+      <button class="tab-btn" data-tab="about">Giới Thiệu</button>
+    </div>
+  </div>
+</header>
 
-        <div class="scripts-grid" id="scriptsGrid" aria-live="polite" style="margin-top:12px"></div>
-      </div>
-
-      <!-- ENCODE TAB -->
-      <div id="encode" class="card tab-panel" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-          <div style="flex:1">
-            <div class="small">Chọn loại mã hoá / giải mã</div>
-            <select id="cipherSelect" class="input">
-              <option value="base64">Base64</option>
-              <option value="rot13">ROT13</option>
-              <option value="caesar">Caesar (shift)</option>
-              <option value="url">URL Encode</option>
-              <option value="hex">Hex</option>
-            </select>
-          </div>
-          <div style="width:180px">
-            <div class="small">Chế độ</div>
-            <select id="modeSelect" class="input">
-              <option value="encode">Mã hoá</option>
-              <option value="decode">Giải mã</option>
-            </select>
-          </div>
-          <div style="width:110px">
-            <div class="small">Shift (Caesar)</div>
-            <input id="shiftInput" type="number" class="input" value="3" min="0" max="25" />
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="encode-grid">
-          <div>
-            <div class="small">Văn bản đầu vào</div>
-            <textarea id="plainInput" placeholder="Nhập văn bản..."></textarea>
-            <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
-              <button id="btnEncode" class="btn">Thực hiện</button>
-              <button id="btnClearEncode" class="ghost">Xoá</button>
-            </div>
-          </div>
-
-          <div>
-            <div class="small">Kết quả</div>
-            <div id="encodeResult" class="result-box mono" contenteditable="false"></div>
-            <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
-              <button id="btnCopyResult" class="copy-btn">Sao chép</button>
-              <button id="btnUseResult" class="ghost">Dùng làm input</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CLIENT TAB -->
-      <div id="client" class="card tab-panel" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:900">Client / Tải về</div>
-            <div class="small">Các link tải & trạng thái. Nhấn "Tải" để mở link.</div>
-          </div>
-          <div class="small">Created by phongYTB • <span id="nowTime"></span></div>
-        </div>
-
-        <div style="margin-top:12px" class="client-grid">
-          <!-- item template -->
-          <div class="client-item">
-            <div>
-              <div style="font-weight:800">Delta X VNG</div>
-              <div class="small">Cập nhật: 23/09/2025 • Phiên bản V2.690 • Anti-Ban: Có</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-              <div class="pill-status status-on small">Hoạt động</div>
-              <a class="btn" href="https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" target="_blank" rel="noopener">Tải</a>
-            </div>
-          </div>
-
-          <div class="client-item">
-            <div>
-              <div style="font-weight:800">Fluxus (Hack Fluxus)</div>
-              <div class="small">Cập nhật: 04/09/2025 • Phiên bản V2.688 • Anti-Ban: Có</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-              <div class="pill-status status-off small">Không hoạt động</div>
-              <a class="btn" href="https://www.mediafire.com/folder/hdnexqcju1bfq/Fluxus" target="_blank" rel="noopener">Tải</a>
-            </div>
-          </div>
-
-          <div class="client-item">
-            <div>
-              <div style="font-weight:800">Arceus X</div>
-              <div class="small">Cập nhật: 23/09/2025 • Phiên bản V2.690 • Anti-Ban: Có</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-              <div class="pill-status status-on small">Hoạt động</div>
-              <a class="btn" href="https://www.mediafire.com/file/8as090ll3x8fup6/ArceusX.2.691.868.apk/file" target="_blank" rel="noopener">Tải</a>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="card">
-          <div style="font-weight:900">Giới thiệu</div>
-          <div class="small" style="margin-top:6px">
-            Tiktok: <strong>hnphong_meobeo</strong><br>
-            Created by <strong>phongYTB</strong>
-          </div>
-        </div>
-
-      </div>
+<main>
+  <!-- ENCRYPT -->
+  <section id="encrypt" class="panel">
+    <div class="title">
+      <h2>🔐 Mã Hoá & Giải Mã</h2>
+      <div class="small">Base64 / Hex / MD5 / SHA-256 / AES</div>
     </div>
 
-    <div class="footer card" style="margin-top:12px">
-      <div class="small">Ghi chú: Đây là demo client-side. Không thực thi các script từ xa tự động.</div>
-      <div class="small">Bạn cần host file lên GitHub Pages để dùng online.</div>
+    <div class="grid" style="margin-top:12px">
+      <div>
+        <label class="small">Phương thức</label>
+        <select id="encMethod" aria-label="method">
+          <option value="base64">Base64</option>
+          <option value="hex">Hex</option>
+          <option value="md5">MD5 (1 chiều)</option>
+          <option value="sha256">SHA-256 (1 chiều)</option>
+          <option value="aes">AES (symmetric)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="small">AES Key (nếu chọn AES)</label>
+        <input id="encKey" placeholder="Nhập key (mặc định phong123)" />
+      </div>
+
+      <div class="full">
+        <label class="small">Văn bản vào</label>
+        <textarea id="inputText" placeholder="Nhập văn bản cần mã hoá/giải mã..."></textarea>
+      </div>
+
+      <div>
+        <label class="small">Hành động</label>
+        <div class="control-row">
+          <button id="btnEncode" class="btn">Mã hoá</button>
+          <button id="btnDecode" class="btn ghost">Giải mã</button>
+          <button id="btnSwap" class="btn ghost" title="Chuyển giữa mã hoá & giải mã">⇄</button>
+        </div>
+        <div style="margin-top:8px" class="small">Gợi ý AES key: nếu trống sẽ dùng <code>phong123</code></div>
+      </div>
+
+      <div class="full">
+        <label class="small">Kết quả</label>
+        <textarea id="outputText" readonly placeholder="Kết quả hiển thị ở đây"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="copyOut" class="btn ghost">Sao chép</button>
+          <button id="clearAll" class="btn ghost">Xóa</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCRIPTS -->
+  <section id="scripts" class="panel" style="display:none">
+    <div class="title">
+      <h2>📜 Script Hub — Steal a Brainrot</h2>
+      <div class="small">Tìm nhanh theo tên, sao chép 1 lần bấm</div>
+    </div>
+
+    <div style="margin-top:12px" class="panel">
+      <div class="searchbar">
+        <input id="searchInput" placeholder="Tìm script theo tên (ví dụ: Lemon, Arbix, Lumin...)" />
+        <button id="btnClearSearch" class="btn ghost">X</button>
+      </div>
+      <div style="margin-top:10px" class="small">Kết quả tìm kiếm sẽ lọc theo bắt đầu hoặc chứa chữ cái</div>
+    </div>
+
+    <div id="scriptContainer" class="script-list" style="margin-top:12px">
+      <!-- JS will populate -->
+    </div>
+  </section>
+
+  <!-- CLIENT -->
+  <section id="client" class="panel" style="display:none">
+    <div class="title">
+      <h2>💻 Client Downloads</h2>
+      <div class="small">Links & status</div>
+    </div>
+
+    <div style="margin-top:12px" class="clients">
+      <div class="client-card">
+        <h4>Delta X VNG</h4>
+        <div class="client-meta">
+          Cập nhật: 23/09/2025<br>
+          Trạng thái: <strong style="color:lime">Hoạt Động</strong><br>
+          Phiên bản: V2.690<br>
+          Anti-Ban: Có
+        </div>
+        <a class="client-btn" target="_blank" rel="noopener" href="https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file">
+          <button class="btn">⬇️ Tải Delta X VNG</button>
+        </a>
+      </div>
+
+      <div class="client-card">
+        <h4>Fluxus</h4>
+        <div class="client-meta">
+          Cập nhật: 04/09/2025<br>
+          Trạng thái: <strong style="color:#ff6b6b">Không Hoạt Động</strong><br>
+          Phiên bản: V2.688<br>
+          Anti-Ban: Có
+        </div>
+        <a class="client-btn" target="_blank" rel="noopener" href="https://www.mediafire.com/folder/hdnexqcju1bfq/Fluxus">
+          <button class="btn ghost">⬇️ Link Fluxus</button>
+        </a>
+      </div>
+
+      <div class="client-card">
+        <h4>Arceus X</h4>
+        <div class="client-meta">
+          Cập nhật: 23/09/2025<br>
+          Trạng thái: <strong style="color:lime">Hoạt Động</strong><br>
+          Phiên bản: V2.691<br>
+          Anti-Ban: Có
+        </div>
+        <a class="client-btn" target="_blank" rel="noopener" href="https://www.mediafire.com/file/8as090ll3x8fup6/ArceusX.2.691.868.apk/file">
+          <button class="btn">⬇️ Tải Arceus X</button>
+        </a>
+      </div>
+
+      <div class="client-card">
+        <h4>Delta X Mirror</h4>
+        <div class="client-meta">Cập nhật: 20/09/2025 — Trạng thái: Hoạt Động</div>
+        <a class="client-btn" target="_blank" rel="noopener" href="https://www.mediafire.com/">
+          <button class="btn ghost">⬇️ Mirror</button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="panel" style="display:none">
+    <div class="title">
+      <h2>ℹ️ Giới thiệu</h2>
+      <div class="small">Created by phongYTB</div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="panel">
+        <p class="small">Tiktok: <strong>hnphong_meobeo</strong></p>
+        <p class="small">Trang này là hub tổng hợp mã hoá, script và client để dễ truy cập. Tất cả dữ liệu là demo/hữu ích cho công việc phát triển.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- modal for script view -->
+  <div id="modalBack" class="modal-back" role="dialog" aria-modal="true">
+    <div class="modal">
+      <button id="closeModal" class="btn ghost" style="float:right">Đóng</button>
+      <h3 id="modalTitle" style="margin-top:2px">Script</h3>
+      <div style="margin-top:8px" id="modalBody" class="script-code"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+        <button id="modalCopy" class="btn">Sao chép</button>
+        <button id="modalRun" class="btn ghost" disabled title="Chỉ copy - không chạy trong trình duyệt">Run (Not in Browser)</button>
+      </div>
     </div>
   </div>
 
+</main>
+
+<footer>
+  © 2025 PhongYTB — Mã Hoá & Script Hub — Mobile friendly UI
+</footer>
+
+<!-- CryptoJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
-/* ========= Data: scripts list (use the ones you gave) ========= */
+/* ============ Data ============ */
 const SCRIPTS = [
-  {name: "Lemon Hub", code: `loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()`},
-  {name: "Arbix Hub New", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()`},
-  {name: "Blue X Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/refs/heads/main/Main.lua"))()`},
-  {name: "Dencrycode", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()`},
-  {name: "Ugly Hub", code: `script_key="Your_Key";\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/77d72e34c893b67ea49b8d62d1a18485.lua"))()`},
-  {name: "Lumin Hub", code: `loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()`},
-  {name: "Tuấn Anh IOS", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhTuanDzai-Hub/TuanAnhIOS/refs/heads/main/BrainRotVip"))()`},
-  {name: "Steel A Mod", code: `loadstring(game:HttpGet("https://rawscripts.net/raw/Steal-a-Brainrot-MODDED-INSTANT-STEALS-EASY-CASH-AND-MORE-KEYLESS-42520"))()`},
-  {name: "Chilli Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()`},
-  {name: "Steel a Brainnot", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()`},
-  {name: "Vokat Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/vokamc/main/refs/heads/main/vokathub"))()`},
-  {name: "Open GUI", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/iw929wiwiw/Teleport-Speed/refs/heads/main/Fall%20Down"))()`},
-  {name: "Makal Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/DoliScriptz/loader/refs/heads/main/main.lua", true))()`},
-  {name: "Arbix Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Instant%20steal.lua"))()`},
-  {name: "Xxlegendxx", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Akbar123s/Script-Roblox-/refs/heads/main/nabaruBrainrot"))()`},
-  {name: "Delfi Hub", code: `loadstring(game:HttpGet("https://pastefy.app/eCzs7DNQ/raw"))()`},
-  {name: "Ronix Hub", code: `loadstring(game:HttpGet("pastebin.com/raw/HFx6faQY"))()`},
-  {name: "AvOnTop Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Ayvathion/AV-On-Top/refs/heads/main/Loader.lua"))()`},
-  {name: "Lurk Hack", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/lurkhackv4/refs/heads/main/main.lua"))()`},
-  {name: "Timmy Hub", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/WinzeTim/timmyhack2/refs/heads/main/stealabrainrot.lua"))()`}
+  {name:"Lemon Hub", code:`loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()`},
+  {name:"Arbix Hub New", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()`},
+  {name:"Blue X Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/refs/heads/main/Main.lua"))()`},
+  {name:"Dencrycode", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()`},
+  {name:"Ugly Hub", code:`script_key="Your_Key";\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/77d72e34c893b67ea49b8d62d1a18485.lua"))()`},
+  {name:"Lumin Hub", code:`loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()`},
+  {name:"Tuấn Anh IOS", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhTuanDzai-Hub/TuanAnhIOS/refs/heads/main/BrainRotVip"))()`},
+  {name:"Steel A Mod", code:`loadstring(game:HttpGet("https://rawscripts.net/raw/Steal-a-Brainrot-MODDED-INSTANT-STEALS-EASY-CASH-AND-MORE-KEYLESS-42520"))()`},
+  {name:"Chilli Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()`},
+  {name:"Steel a Brainnot", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()`},
+  {name:"Vakat Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/vokamc/main/refs/heads/main/vokathub"))()`},
+  {name:"Open GUI", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/iw929wiwiw/Teleport-Speed/refs/heads/main/Fall%20Down"))()`},
+  {name:"Makal Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/DoliScriptz/loader/refs/heads/main/main.lua", true))()`},
+  {name:"Arbix Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Instant%20steal.lua"))()`},
+  {name:"Xxlegendxx", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Akbar123s/Script-Roblox-/refs/heads/main/nabaruBrainrot"))()`},
+  {name:"Delfi Hub", code:`loadstring(game:HttpGet("https://pastefy.app/eCzs7DNQ/raw"))()`},
+  {name:"Ronix Hub", code:`loadstring(game:HttpGet("pastebin.com/raw/HFx6faQY"))()`},
+  {name:"AvOnTop Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/Ayvathion/AV-On-Top/refs/heads/main/Loader.lua"))()`},
+  {name:"Lurk Hack", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/lurkhackv4/refs/heads/main/main.lua"))()`},
+  {name:"Timmy Hub", code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/WinzeTim/timmyhack2/refs/heads/main/stealabrainrot.lua"))()`}
 ];
 
-/* ---------- UI helpers ---------- */
-const scriptsGrid = document.getElementById('scriptsGrid');
-const scriptSearch = document.getElementById('scriptSearch');
-const btnClearSearch = document.getElementById('btnClearSearch');
-const scriptEditor = document.getElementById('scriptEditor');
-const btnPasteEditor = document.getElementById('btnPasteEditor');
-const btnCopyEditor = document.getElementById('btnCopyEditor');
-const scriptSelectMode = {};
-
-/* render scripts (filtered) */
-function renderScripts(filter){
-  scriptsGrid.innerHTML = '';
-  const q = (filter||'').trim().toLowerCase();
-  const list = SCRIPTS.filter(s=>{
-    if(!q) return true;
-    // match prefix words: check if name startsWith q or any word startsWith q
-    const name = s.name.toLowerCase();
-    if(name.startsWith(q)) return true;
-    return name.split(/\s+/).some(w=> w.startsWith(q));
+/* ============ Tabs ============ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('main > section').forEach(s=> s.style.display = 'none');
+    const el = document.getElementById(tab);
+    if(el) el.style.display = 'block';
+    window.scrollTo({top:0,behavior:'smooth'});
+    // ensure scripts rebuilt when switching
+    if(tab === 'scripts') buildScriptList();
   });
-  if(list.length===0){
-    const empty = document.createElement('div'); empty.className='small'; empty.textContent = 'Không tìm thấy script.';
-    scriptsGrid.appendChild(empty); return;
-  }
-  list.forEach(s => {
-    const card = document.createElement('div'); card.className = 'script-card';
-    const header = document.createElement('div'); header.className='script-header';
-    const left = document.createElement('div'); left.style.display='flex'; left.style.gap='12px'; left.style.alignItems='center';
-    const dot = document.createElement('div'); dot.style.width='44px'; dot.style.height='44px'; dot.style.borderRadius='10px'; dot.style.background='linear-gradient(135deg,#0ea5ff,#0077ff)'; dot.style.display='flex'; dot.style.alignItems='center'; dot.style.justifyContent='center'; dot.style.fontWeight='900'; dot.style.color='#001';
-    dot.textContent = s.name.split(' ')[0].substring(0,2).toUpperCase();
-    const title = document.createElement('div'); title.innerHTML = `<div class="script-title">${s.name}</div><div class="small">Click "Sao chép" để copy script</div>`;
-    left.appendChild(dot); left.appendChild(title);
-    const actions = document.createElement('div'); actions.className='script-actions';
-    const btnCopy = document.createElement('button'); btnCopy.className='copy-btn'; btnCopy.textContent='Sao chép';
-    btnCopy.addEventListener('click', ()=>{ copyText(s.code); flashCopy(btnCopy); });
-    const btnLoad = document.createElement('button'); btnLoad.className='ghost'; btnLoad.textContent='Dán vào ô';
-    btnLoad.addEventListener('click', ()=>{ scriptEditor.value = s.code; scriptEditor.focus(); });
-    actions.appendChild(btnLoad); actions.appendChild(btnCopy);
-    header.appendChild(left); header.appendChild(actions);
+});
 
-    const box = document.createElement('pre'); box.className='small mono'; box.style.margin='0'; box.style.padding='8px'; box.style.background='rgba(255,255,255,0.01)'; box.style.borderRadius='8px'; box.textContent = s.code;
+/* ============ Encrypt / Decrypt ============ */
+const inputText = document.getElementById('inputText');
+const outputText = document.getElementById('outputText');
+const encMethod = document.getElementById('encMethod');
+const encKey = document.getElementById('encKey');
+const btnEncode = document.getElementById('btnEncode');
+const btnDecode = document.getElementById('btnDecode');
+const btnSwap = document.getElementById('btnSwap');
+const btnCopyOut = document.getElementById('copyOut');
+const btnClearAll = document.getElementById('clearAll');
 
-    card.appendChild(header);
-    card.appendChild(box);
-    scriptsGrid.appendChild(card);
-  });
+function getAesKey(){
+  let k = encKey.value.trim();
+  if(!k) k = 'phong123';
+  return k;
 }
 
-/* copy util + small effect */
-function copyText(txt){
-  navigator.clipboard.writeText(txt).then(()=> {
-    // success
-  }).catch(()=> {
-    // fallback
-    const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
-    try{ document.execCommand('copy'); }catch(e){}
-    ta.remove();
-  });
-}
-function flashCopy(btn){
-  const old = btn.innerHTML;
-  btn.innerHTML = 'Đã sao chép ✓';
-  btn.style.opacity = '0.95';
-  setTimeout(()=>{ btn.innerHTML = old; btn.style.opacity='1'; },1500);
-}
-
-/* search binding */
-scriptSearch.addEventListener('input', ()=> renderScripts(scriptSearch.value));
-btnClearSearch.addEventListener('click', ()=>{ scriptSearch.value=''; renderScripts(''); });
-
-/* editor quick */
-btnPasteEditor.addEventListener('click', async ()=>{
+function encodeText(){
+  const method = encMethod.value;
+  const text = inputText.value;
+  if(!text){ alert('Nhập văn bản vào ô trên'); return; }
   try{
-    const text = await navigator.clipboard.readText();
-    scriptEditor.value = text || scriptEditor.value;
-    scriptEditor.focus();
-  }catch(e){
-    alert('Không thể đọc clipboard (trình duyệt chặn). Dán thủ công vào ô.');
+    let out = '';
+    if(method === 'base64'){
+      out = btoa(unescape(encodeURIComponent(text)));
+    } else if(method === 'hex'){
+      out = Array.from(new TextEncoder().encode(text)).map(b => b.toString(16).padStart(2,'0')).join('');
+    } else if(method === 'md5'){
+      out = CryptoJS.MD5(text).toString();
+    } else if(method === 'sha256'){
+      out = CryptoJS.SHA256(text).toString();
+    } else if(method === 'aes'){
+      const key = getAesKey();
+      out = CryptoJS.AES.encrypt(text, key).toString();
+    } else {
+      out = text;
+    }
+    outputText.value = out;
+  } catch(e){
+    alert('Lỗi khi encode: ' + e.message);
+  }
+}
+
+function decodeText(){
+  const method = encMethod.value;
+  const text = inputText.value;
+  if(!text){ alert('Nhập văn bản đã mã hoá vào ô trên để giải mã'); return; }
+  try{
+    let out = '';
+    if(method === 'base64'){
+      out = decodeURIComponent(escape(atob(text)));
+    } else if(method === 'hex'){
+      // hex -> string
+      const bytes = text.match(/.{1,2}/g) || [];
+      out = new TextDecoder().decode(new Uint8Array(bytes.map(b=>parseInt(b,16))));
+    } else if(method === 'md5' || method === 'sha256'){
+      alert('MD5 và SHA-256 là hàm 1 chiều, không thể giải mã');
+      return;
+    } else if(method === 'aes'){
+      const key = getAesKey();
+      const bytes = CryptoJS.AES.decrypt(text, key);
+      out = bytes.toString(CryptoJS.enc.Utf8);
+      if(!out) { alert('Giải mã AES thất bại (kiểm tra key)'); return; }
+    } else {
+      out = text;
+    }
+    outputText.value = out;
+  } catch(e){
+    alert('Lỗi khi decode: ' + e.message);
+  }
+}
+
+btnEncode.addEventListener('click', encodeText);
+btnDecode.addEventListener('click', decodeText);
+btnSwap.addEventListener('click', ()=>{
+  // swap between input and output
+  const a = inputText.value;
+  inputText.value = outputText.value;
+  outputText.value = a;
+});
+
+btnCopyOut.addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(outputText.value || '');
+    alert('Đã sao chép kết quả');
+  } catch(e){
+    // fallback
+    outputText.select();
+    document.execCommand('copy');
+    alert('Đã sao chép (fallback)');
   }
 });
-btnCopyEditor.addEventListener('click', ()=>{ if(!scriptEditor.value) return alert('Ô rỗng'); copyText(scriptEditor.value); btnCopyEditor.textContent='Đã sao chép'; setTimeout(()=>btnCopyEditor.textContent='Sao chép',1200); });
 
-/* initial render */
-renderScripts('');
+btnClearAll.addEventListener('click', ()=>{
+  inputText.value = '';
+  outputText.value = '';
+  encKey.value = '';
+});
 
-/* ---------- ENCODE / DECODE ---------- */
-const cipherSelect = document.getElementById('cipherSelect');
-const modeSelect = document.getElementById('modeSelect');
-const shiftInput = document.getElementById('shiftInput');
-const plainInput = document.getElementById('plainInput');
-const btnEncode = document.getElementById('btnEncode');
-const btnClearEncode = document.getElementById('btnClearEncode');
-const encodeResult = document.getElementById('encodeResult');
-const btnCopyResult = document.getElementById('btnCopyResult');
-const btnUseResult = document.getElementById('btnUseResult');
+/* ============ Script list rendering & search ============ */
+const scriptContainer = document.getElementById('scriptContainer');
+const searchInput = document.getElementById('searchInput');
+const btnClearSearch = document.getElementById('btnClearSearch');
 
-function doEncode(){
-  const mode = modeSelect.value;
-  const cipher = cipherSelect.value;
-  const text = plainInput.value || '';
-  let out = '';
-  try{
-    if(cipher === 'base64'){
-      if(mode === 'encode') out = btoa(unescape(encodeURIComponent(text)));
-      else out = decodeURIComponent(escape(atob(text)));
-    } else if(cipher === 'rot13'){
-      out = text.replace(/[A-Za-z]/g, function(c){
-        return String.fromCharCode( (c<="Z"?90:122) >= (c=c.charCodeAt(0)+13) ? c : c-26 );
-      });
-      if(mode==='decode') { /* rot13 symmetric */ }
-    } else if(cipher === 'caesar'){
-      const shift = Number(shiftInput.value)
+// Build script list (safe, only client-side)
+function buildScriptList(filter = ''){
+  scriptContainer.innerHTML = '';
+  const q = (filter || '').trim().toLowerCase();
+  // order by name
+  const data = SCRIPTS.slice().sort((a,b)=> a.name.localeCompare(b.name));
+  const filtered = data.filter(s=>{
+    if(!q) return true;
+    return s.name.toLowerCase().includes(q) || s.name.toLowerCase().startsWith(q);
+  });
+
+  if(filtered.length === 0){
+    scriptContainer.innerHTML = `<div class="small">Không tìm thấy script nào cho: "${filter}"</div>`;
+    return;
+  }
+
+  filtered.forEach(s=>{
+    const card = document.createElement('div');
+    card.className = 'script-card';
+    card.innerHTML = `
+      <div class="script-top">
+        <div class="script-name">${escapeHtml(s.name)}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn ghost view-btn" data-name="${escapeHtml(s.name)}">Xem</button>
+          <button class="btn" data-copy='${encodeURIComponent(s.code)}'>Sao chép</button>
+        </div>
+      </div>
+      <div class="script-row">
+        <div class="small" style="color:var(--muted)">${s.code.substring(0,80)}${s.code.length>80?'...':''}</div>
+      </div>
+    `;
+    scriptContainer.appendChild(card);
+  });
+
+  // attach handlers
+  scriptContainer.querySelectorAll('button[d
