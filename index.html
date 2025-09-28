@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhongYTB chia sẻ script</title>
+    <title>Phong Hub - Công Cụ & Giải Trí</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
@@ -96,7 +96,6 @@
         <div class="bg-card-bg p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-primary">
             <h3 id="modal-title" class="text-xl font-bold mb-3 text-white">Thông báo</h3>
             <p id="modal-content" class="text-gray-300 mb-6"></p>
-            <!-- Sử dụng data-action="close-modal" để lắng nghe qua JS -->
             <div id="modal-actions" class="flex justify-end space-x-3">
                 <button data-action="close-modal" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
             </div>
@@ -111,7 +110,7 @@
         </p>
         
         <div class="space-y-4 w-full max-w-sm">
-            <!-- Nút 1: Đến Kênh TikTok (Thẻ A đảm bảo link mở trực tiếp) -->
+            <!-- Nút 1: Đến Kênh TikTok (Giữ thẻ A nhưng sẽ sử dụng event.preventDefault() trong JS) -->
             <a href="https://tiktok.com/@hnphong_anime" target="_blank" data-action="open-tiktok"
                 id="tiktok-btn"
                 class="w-full py-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg transition transform hover:scale-[1.03] flex items-center justify-center">
@@ -225,7 +224,7 @@
             brainrot: [
                 { name: "Lemon Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()' },
                 { name: "Arbix Hub New", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()' },
-                { name: "Blue X Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/refs/heads/main/Main.lua"))()' },
+                { name: "Blue X Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/main/Main.lua"))()' },
                 { name: "Eclipse Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Fauzi145/V-Hub/main/Eclipse.lua"))()' },
                 { name: "Nexuz Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NexuzHub/NexuzHub/main/Loading.lua"))()' },
                 { name: "Venom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/VenomHub-Script/loader/main/load.lua"))()' },
@@ -273,12 +272,10 @@
 
         // --- ENCRYPTION/DECRYPTION LOGIC (Chức năng Mã Hóa) ---
 
-        // Hàm Mã hóa/Giải mã Caesar (Shift 3) - Được nhúng trực tiếp
         const caesarCipher = (text, shift, mode) => {
             const finalShift = mode === 'encrypt' ? shift : -shift;
             return text.split('').map(char => {
                 const code = char.charCodeAt(0);
-                // Chỉ xử lý A-Z, a-z, 0-9
                 if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
                     const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
                     const wrap = (code >= 48 && code <= 57) ? 10 : (code <= 90 ? 26 : 26);
@@ -301,7 +298,6 @@
             try {
                 switch (type) {
                     case 'base64':
-                        // Sử dụng built-in Browser API (An toàn hơn CSP)
                         if (mode === 'encrypt') {
                             return btoa(unescape(encodeURIComponent(text)));
                         } else {
@@ -312,7 +308,6 @@
                     case 'caesar':
                          return caesarCipher(text, 3, mode);
                     case 'aes':
-                        // Yêu cầu thư viện CryptoJS (RẤT DỄ BỊ CHẶN)
                         if (typeof CryptoJS === 'undefined') {
                              return 'Lỗi: Thư viện AES (CryptoJS) bị chặn tải. Vui lòng chạy file HTML cục bộ.';
                         }
@@ -354,7 +349,6 @@
                     await signInAnonymously(auth);
                 }
                 
-                // Wait for auth state change to get the UID
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
@@ -362,4 +356,16 @@
                         userId = crypto.randomUUID(); 
                     }
                     await logAccess();
-                    checkLockSta
+                    checkLockStatus();
+                });
+
+            } catch (error) {
+                console.warn("Firebase Init/Auth Error: Có thể bị chặn bởi CSP/môi trường.");
+                userId = crypto.randomUUID();
+                checkLockStatus();
+                return;
+            }
+        }
+
+        async function fetchDeviceInfo() {
+            const mockIP = `${Math.floor(Math
