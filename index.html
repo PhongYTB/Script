@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong YTB cung cấp script free</title>
+    <title>PhongYTB -chia sẻ script đến mọi người</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
+    <!-- Tải Thư viện Crypto-JS cho mã hóa AES (RẤT DỄ BỊ CHẶN) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
@@ -111,14 +111,14 @@
         </p>
         
         <div class="space-y-4 w-full max-w-sm">
-            <!-- Nút 1: Đến Kênh TikTok -->
-            <button data-action="open-tiktok"
+            <!-- Nút 1: Đến Kênh TikTok (Đã chuyển thành thẻ <a> để hoạt động TRỰC TIẾP) -->
+            <a href="https://tiktok.com/@hnphong_anime" target="_blank" data-action="open-tiktok"
                 class="w-full py-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg transition transform hover:scale-[1.03] flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M9 0h1.8c.123 1.545.424 3.141.794 4.095.385.996 1.055 2.115 1.554 2.378.36.194.887.214 1.25-.138.083-.079.167-.162.25-.245v2.8a.7.7 0 0 1-.3.518c-.464.382-1.39.462-2.316.353-1.076-.128-2.146-.477-3.153-1.01-1.437-.77-2.67-1.7-3.414-3.085-1.127-2.074-1.157-5.07-.184-7.075h2.245c-.328 1.96.143 3.992.937 5.56.88.75 1.956 1.34 3.012 1.57V0zm.8 4.07h.78V.74h-.78V4.07z"/>
                 </svg>
                 1. FOLLOW KÊNH TIKTOK (hnphong_anime)
-            </button>
+            </a>
             
             <!-- Nút 2: Mở Khóa -->
             <button data-action="unlock-app" id="unlock-btn" disabled 
@@ -175,7 +175,7 @@
 
     <!-- Script Block -->
     <script type="module">
-        // --- FIREBASE IMPORTS ---
+        // --- FIREBASE IMPORTS (RẤT DỄ BỊ CHẶN) ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, addDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -206,7 +206,8 @@
 
         const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key;
         const ADMIN_KEY = 'adminphong'; 
-        const TIKTOK_URL = 'https://tiktok.com/@hnphong_anime';
+        // Lấy URL từ thuộc tính href của thẻ <a> trong lock-screen
+        const TIKTOK_URL = document.querySelector('[data-action="open-tiktok"]')?.href || 'https://tiktok.com/@hnphong_anime'; 
         const UNLOCK_DELAY_SECONDS = 3; 
 
         // --- DATA BỘ DỮ LIỆU CỨNG ---
@@ -268,60 +269,59 @@
 
 
         // --- ENCRYPTION/DECRYPTION LOGIC (Chức năng Mã Hóa) ---
+
+        // Hàm Mã hóa/Giải mã Caesar (Shift 3) - Được nhúng trực tiếp
+        const caesarCipher = (text, shift, mode) => {
+            const finalShift = mode === 'encrypt' ? shift : -shift;
+            return text.split('').map(char => {
+                const code = char.charCodeAt(0);
+                // Chỉ xử lý A-Z, a-z, 0-9
+                if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
+                    const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
+                    const wrap = (code >= 48 && code <= 57) ? 10 : (code <= 90 ? 26 : 26);
+                    
+                    let newCode = code - base;
+                    newCode = (newCode + finalShift) % wrap;
+                    
+                    if (newCode < 0) {
+                        newCode += wrap;
+                    }
+                    return String.fromCharCode(newCode + base);
+                }
+                return char; 
+            }).join('');
+        };
+
         const encodeDecode = (text, type, mode) => {
             if (!text) return '';
-            // CHECK: Đảm bảo CryptoJS đã tải
-            if (typeof CryptoJS === 'undefined') {
-                 return 'Lỗi: Thư viện mã hóa (CryptoJS) chưa tải xong. Vui lòng chạy file HTML cục bộ.';
-            }
 
             try {
                 switch (type) {
                     case 'base64':
+                        // Sử dụng built-in Browser API (An toàn hơn CSP)
                         if (mode === 'encrypt') {
-                            return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+                            return btoa(unescape(encodeURIComponent(text)));
                         } else {
-                            if (text.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(text)) {
-                                return 'Lỗi: Chuỗi Base64 không hợp lệ.';
-                            }
-                            return CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8);
+                            return decodeURIComponent(escape(atob(text)));
                         }
                     case 'url':
                         return mode === 'encrypt' ? encodeURIComponent(text) : decodeURIComponent(text);
                     case 'caesar':
-                         return text.split('').map(char => {
-                            const code = char.charCodeAt(0);
-                            let shift = mode === 'encrypt' ? 3 : -3;
-                            if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
-                                const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
-                                const max = (code >= 65 && code <= 90) ? 90 : (code >= 97 && code <= 122) ? 122 : 57;
-                                const wrap = (max - base) + 1; 
-                                
-                                let newCode = code - base;
-                                newCode = (newCode + shift) % wrap;
-                                
-                                if (newCode < 0) {
-                                    newCode += wrap;
-                                }
-
-                                return String.fromCharCode(newCode + base);
-                            }
-                            return char; 
-                        }).join('');
+                         return caesarCipher(text, 3, mode);
                     case 'aes':
+                        // Yêu cầu thư viện CryptoJS (RẤT DỄ BỊ CHẶN)
+                        if (typeof CryptoJS === 'undefined') {
+                             return 'Lỗi: Thư viện AES (CryptoJS) bị chặn tải. Vui lòng chạy file HTML cục bộ.';
+                        }
                         if (mode === 'encrypt') {
                             return CryptoJS.AES.encrypt(text, ENCRYPTION_SECRET_KEY).toString();
                         } else {
                             const bytes = CryptoJS.AES.decrypt(text, ENCRYPTION_SECRET_KEY);
                             if (!bytes.sigBytes || bytes.sigBytes === 0) {
-                                return 'Lỗi: Key AES sai hoặc dữ liệu không phải mật mã AES hợp lệ.';
+                                return 'Lỗi: Key AES sai hoặc dữ liệu không hợp lệ.';
                             }
-                            try {
-                                const result = bytes.toString(CryptoJS.enc.Utf8);
-                                return result || 'Lỗi: Giải mã thành công nhưng kết quả là chuỗi rỗng.';
-                            } catch (e) {
-                                return 'Lỗi: Dữ liệu giải mã không phải là UTF-8 hợp lệ.';
-                            }
+                            const result = bytes.toString(CryptoJS.enc.Utf8);
+                            return result || 'Lỗi: Giải mã thành công nhưng kết quả rỗng.';
                         }
                     default:
                         return 'Lỗi: Loại mã hóa không hợp lệ.';
@@ -331,11 +331,12 @@
             }
         };
 
-        // --- FIREBASE INITIALIZATION & ACCESS LOGGING ---
+        // --- FIREBASE INITIALIZATION & ACCESS LOGGING (DỄ BỊ CHẶN) ---
 
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 console.error("Firebase config is missing. Cannot initialize Firestore.");
+                checkLockStatus();
                 return;
             }
 
@@ -349,14 +350,17 @@
                 } else {
                     await signInAnonymously(auth);
                 }
+                
+                // Wait for auth state change to get the UID
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else {
+                        userId = crypto.randomUUID(); 
+                    }
+                    await logAccess();
+                    checkLockStatus();
+                });
+
             } catch (error) {
-                console.error("Firebase Init/Auth Error (BỊ CHẶN):", error);
-                userId = crypto.randomUUID();
-                checkLockStatus();
-                return;
-            }
-            
-            // Wait for auth state change to get the UID
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid
+                consol
