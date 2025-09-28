@@ -3,71 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong Hub - Công Cụ & Giải Trí</title>
+    <title>Phong YTB lấy script</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tải Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, query, onSnapshot, serverTimestamp, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // --- GLOBAL SETUP ---
-        // Biến toàn cục để sử dụng trong JS
-        window.firebase = {
-            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged,
-            getFirestore, doc, setDoc, collection, query, onSnapshot, serverTimestamp, getDocs, orderBy, limit
-        };
-        window.APP = {
-            db: null,
-            auth: null,
-            userId: null,
-            isAuthReady: false,
-            // Cấu hình Firebase được cung cấp bởi môi trường
-            firebaseConfig: typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null,
-            authToken: typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null,
-            appId: typeof __app_id !== 'undefined' ? __app_id : 'default-phong-hub',
-        };
-
-        async function initFirebase() {
-            if (!window.APP.firebaseConfig) {
-                console.error("Firebase config is missing.");
-                return;
-            }
-
-            const app = firebase.initializeApp(window.APP.firebaseConfig);
-            window.APP.db = firebase.getFirestore(app);
-            window.APP.auth = firebase.getAuth(app);
-
-            // Đăng nhập hoặc sử dụng token
-            if (window.APP.authToken) {
-                await firebase.signInWithCustomToken(window.APP.auth, window.APP.authToken).catch(e => {
-                    console.error("Custom token sign-in failed, falling back to anonymous.", e);
-                    return firebase.signInAnonymously(window.APP.auth);
-                });
-            } else {
-                await firebase.signInAnonymously(window.APP.auth);
-            }
-
-            firebase.onAuthStateChanged(window.APP.auth, (user) => {
-                if (user) {
-                    window.APP.userId = user.uid;
-                } else {
-                    window.APP.userId = crypto.randomUUID();
-                }
-                window.APP.isAuthReady = true;
-                console.log("Firebase Auth Ready. User ID:", window.APP.userId);
-                // Đảm bảo window.appLogic tồn tại trước khi gọi startApp
-                if (window.appLogic && typeof window.appLogic.startApp === 'function') {
-                    window.appLogic.startApp();
-                }
-            });
-        }
-
-        initFirebase();
-    </script>
-    <!-- Thư viện AES/Crypto-JS (chỉ cần 1 phần) -->
+    <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
     <style>
         :root {
             --primary: #8b5cf6; /* Violet */
@@ -117,7 +58,6 @@
             <p id="modal-content" class="text-gray-300 mb-6"></p>
             <div id="modal-actions" class="flex justify-end space-x-3">
                 <button id="modal-close" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
-                <!-- Nút Tùy chọn, ví dụ: "Tiếp tục" -->
             </div>
         </div>
     </div>
@@ -142,42 +82,29 @@
     <main id="main-content" class="flex-grow p-4 md:p-8">
         <!-- Content will be rendered here -->
         <div class="flex items-center justify-center h-full min-h-[300px]">
-            <p id="loading-message" class="text-xl text-gray-400 animate-pulse">Đang khởi tạo ứng dụng và kết nối Firebase...</p>
+            <p id="loading-message" class="text-xl text-gray-400">Đang khởi tạo...</p>
         </div>
     </main>
 
     <script>
-        // Lấy trạng thái Key Premium đã lưu từ localStorage
-        const storedKeyValid = localStorage.getItem('phonghub_admin_key_valid') === 'true';
-
-        // --- GLOBAL STATE ---
+        // --- GLOBAL STATE (Không dùng localStorage) ---
         const APP_STATE = {
             view: 'gioi-thieu', // current active section
             encryption: {
-                key: "Roland", // Mặc định cho AES
-            },
-            ai: {
-                mode: 'chat', // 'chat' hoặc 'image'
-                chatHistory: [],
-                imagePrompt: '',
-                isLoading: false,
-                lastResult: null,
+                key: "Roland",
             },
             keyPremium: {
-                enteredKey: '',
-                isValid: storedKeyValid, // <--- Sử dụng trạng thái đã lưu
-                visitorLogs: [],
-                currentUserIP: 'Đang tải...',
+                // Mặc định là false. Trạng thái chỉ giữ trong phiên làm việc hiện tại.
+                isValid: false, 
+                // Tạo UUID giả định vì không thể lưu trữ cục bộ an toàn
+                currentUserUUID: crypto.randomUUID(), 
             },
             scripts: {
-                currentCategory: 'brainrot', // 'brainrot' hoặc 'garden'
+                currentCategory: 'brainrot',
             },
-            games: {
-                // Game States will be initialized later
-            }
         };
 
-        // --- DATA BỘ DỮ LIỆU ---
+        // --- DATA BỘ DỮ LIỆU CỨNG (HARDCODED DATA) ---
 
         const ENCRYPTION_TYPES = [
             { id: 'base64', name: 'Base64 (Mã hóa cơ bản)' },
@@ -268,32 +195,89 @@
         ];
 
 
-        // --- FIREBASE / ADMIN LOGIC ---
+        // --- ENCRYPTION/DECRYPTION LOGIC (CHẠY HOÀN TOÀN CỤC BỘ) ---
 
-        const adminLogVisitor = async () => {
-            if (typeof window.APP === 'undefined' || !window.APP.isAuthReady || !window.APP.db) return;
+        const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key; // "Roland"
 
-            let ip = '127.0.0.1 (Local)';
-            let geoData = {
-                country: 'N/A',
-                regionName: 'N/A',
-                city: 'N/A',
-                isp: 'N/A', 
-                org: 'N/A'
-            };
-
+        const encodeDecode = (text, type, mode) => {
+            if (!text) return '';
             try {
-                // 1. Lấy IP mô phỏng
-                const ipResponse = await fetch("https://api.ipify.org?format=json");
-                const ipData = await ipResponse.json();
-                ip = ipData.ip || ip;
-                APP_STATE.keyPremium.currentUserIP = ip;
+                switch (type) {
+                    case 'base64':
+                        if (mode === 'encrypt') {
+                            return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+                        } else {
+                            if (text.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(text)) {
+                                return 'Lỗi: Chuỗi Base64 không hợp lệ.';
+                            }
+                            // Sử dụng .toString(CryptoJS.enc.Utf8) để đảm bảo kết quả giải mã
+                            return CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8);
+                        }
+                    case 'url':
+                        if (mode === 'encrypt') {
+                            return encodeURIComponent(text);
+                        } else {
+                            return decodeURIComponent(text);
+                        }
+                    case 'caesar':
+                        // Dịch 3 ký tự (Shift 3)
+                        return text.split('').map(char => {
+                            const code = char.charCodeAt(0);
+                            let shift = mode === 'encrypt' ? 3 : -3;
+                            if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
+                                const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
+                                const max = (code >= 65 && code <= 90) ? 90 : (code >= 97 && code <= 122) ? 122 : 57;
+                                let newCode = code + shift;
+                                if (newCode > max) {
+                                    newCode = base + (newCode - max - 1);
+                                } else if (newCode < base) {
+                                    newCode = max - (base - newCode - 1);
+                                }
+                                return String.fromCharCode(newCode);
+                            }
+                            return char; 
+                        }).join('');
+                    case 'aes':
+                        if (mode === 'encrypt') {
+                            return CryptoJS.AES.encrypt(text, ENCRYPTION_SECRET_KEY).toString();
+                        } else {
+                            const bytes = CryptoJS.AES.decrypt(text, ENCRYPTION_SECRET_KEY);
+                            if (!bytes.sigBytes || bytes.sigBytes === 0) {
+                                return 'Lỗi: Key AES sai hoặc dữ liệu không phải mật mã AES hợp lệ.';
+                            }
+                            try {
+                                return bytes.toString(CryptoJS.enc.Utf8);
+                            } catch (e) {
+                                return 'Lỗi: Dữ liệu giải mã không phải là UTF-8 hợp lệ.';
+                            }
+                        }
+                    default:
+                        return 'Lỗi: Loại mã hóa không hợp lệ.';
+                }
+            } catch (e) {
+                return `Lỗi xử lý: ${e.message}. Dữ liệu không hợp lệ cho loại mã hóa/giải mã này.`;
+            }
+        };
 
-                // 2. Lấy Geo-IP data
-                // ip-api.com là dịch vụ Geo-IP miễn phí
-                const geoResponse = await fetch(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,org`);
-                const geoIpData = await geoResponse.json();
+        // --- COMMON UI FUNCTIONS ---
 
-                if (geoIpData.status === 'success') {
-                    geoData.country = geoIpData.country || 'N/A';
-                    geoData.region
+        const mainContent = document.getElementById('main-content');
+        const navLinks = document.getElementById('nav-links');
+        const modal = document.getElementById('custom-modal');
+
+        const showModal = (title, content, actionsHtml = '') => {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-actions').innerHTML = actionsHtml || `<button id="modal-close-simple" onclick="hideModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>`;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('modal-close-simple')?.focus();
+        };
+
+        const hideModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        const copyToClipboard = (text, message = 'Đã Sao Chép >^<') => {
+            if (!text || text.tri
