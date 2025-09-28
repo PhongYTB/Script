@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong Hub -🌮🌮🌮🌮</title>
+    <title>Phong Hub - 🥚🌮🌮</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
@@ -49,7 +49,7 @@
         
         /* Đảm bảo Main App Container luôn hiển thị ngay lập tức */
         .main-layout {
-            display: flex; /* Đã thay đổi: luôn là flex */
+            display: flex; /* Luôn là flex */
             min-height: 100vh;
         }
         
@@ -96,7 +96,6 @@
     </div>
 
     <!-- Toàn bộ Ứng dụng chính -->
-    <!-- Đã loại bỏ #lock-screen và đảm bảo #main-app-container luôn là display:flex -->
     <div id="main-app-container" class="main-layout w-full min-h-screen">
 
         <!-- Header Mobile -->
@@ -297,8 +296,6 @@
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 console.error("Firebase config is missing. Cannot initialize Firestore.");
-                // Bỏ qua lock screen, chuyển thẳng sang render
-                changeView(APP_STATE.view); 
                 return;
             }
 
@@ -320,14 +317,11 @@
                         userId = crypto.randomUUID(); 
                     }
                     await logAccess();
-                    // Bỏ qua lock screen, chuyển thẳng sang render
-                    changeView(APP_STATE.view); 
                 });
 
             } catch (error) {
-                console.warn("Firebase Init/Auth Error: Có thể bị chặn bởi CSP/môi trường. Chuyển sang chế độ truy cập thẳng.");
+                console.warn("Firebase Init/Auth Error: Có thể bị chặn tải.");
                 userId = crypto.randomUUID();
-                changeView(APP_STATE.view);
                 return;
             }
         }
@@ -381,4 +375,14 @@
             if (isMenuOpen) {
                 sidebar.classList.remove('-translate-x-full');
                 menuIconOpen.classList.add('hidden');
-        
+                menuIconClose.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                menuIconOpen.classList.remove('hidden');
+                menuIconClose.classList.add('hidden');
+            }
+        }
+
+        const showModal = (title, content, actionsHtml = '') => {
+            document.getElementById('modal-title').innerText = title;
+            documen
