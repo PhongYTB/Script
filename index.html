@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong Hub - Công Cụ & Giải Trí</title>
+    <title>Phong YTB - web cung cấp script miễn phí</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
@@ -36,7 +36,6 @@
             background-color: #374151;
             color: #fff;
         }
-        /* Custom Scrollbar for better UX */
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
@@ -47,19 +46,46 @@
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #1f2937;
         }
-        .copy-btn {
-            transition: all 0.3s;
-        }
-
-        /* Ẩn nội dung chính ban đầu */
         #main-app-container {
             display: none;
             opacity: 0;
             transition: opacity 0.5s;
         }
         #main-app-container.visible {
-            display: block; /* Đặt lại thành block vì sidebar đã là fixed/absolute */
+            display: flex;
             opacity: 1;
+        }
+        .main-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 767px) {
+            #sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                height: 100%;
+                z-index: 40;
+            }
+            #main-content {
+                 padding-top: 64px; 
+                 width: 100%;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            #sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                height: 100%;
+                z-index: 30;
+            }
+            #main-content {
+                margin-left: 16rem; 
+                padding-top: 2rem;
+            }
         }
     </style>
 </head>
@@ -70,13 +96,14 @@
         <div class="bg-card-bg p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-primary">
             <h3 id="modal-title" class="text-xl font-bold mb-3 text-white">Thông báo</h3>
             <p id="modal-content" class="text-gray-300 mb-6"></p>
+            <!-- Sử dụng data-action="close-modal" để lắng nghe qua JS -->
             <div id="modal-actions" class="flex justify-end space-x-3">
-                <button id="modal-close" onclick="hideModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
+                <button data-action="close-modal" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
             </div>
         </div>
     </div>
 
-    <!-- Màn Hình Khóa (Lock Screen) - Hiển thị mặc định -->
+    <!-- Màn Hình Khóa (Lock Screen) -->
     <div id="lock-screen" class="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 p-6 text-center">
         <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-6">FOLLOW KÊNH TIKTOK ĐỂ LẤY SCRIPTS</h1>
         <p class="text-lg text-gray-300 mb-8 max-w-md">
@@ -84,8 +111,8 @@
         </p>
         
         <div class="space-y-4 w-full max-w-sm">
-            <!-- Nút 1: Đến Kênh TikTok (Open TikTok) -->
-            <button id="tiktok-link-btn" onclick="openTikTok()"
+            <!-- Nút 1: Đến Kênh TikTok -->
+            <button data-action="open-tiktok"
                 class="w-full py-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg transition transform hover:scale-[1.03] flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M9 0h1.8c.123 1.545.424 3.141.794 4.095.385.996 1.055 2.115 1.554 2.378.36.194.887.214 1.25-.138.083-.079.167-.162.25-.245v2.8a.7.7 0 0 1-.3.518c-.464.382-1.39.462-2.316.353-1.076-.128-2.146-.477-3.153-1.01-1.437-.77-2.67-1.7-3.414-3.085-1.127-2.074-1.157-5.07-.184-7.075h2.245c-.328 1.96.143 3.992.937 5.56.88.75 1.956 1.34 3.012 1.57V0zm.8 4.07h.78V.74h-.78V4.07z"/>
@@ -93,8 +120,8 @@
                 1. FOLLOW KÊNH TIKTOK (hnphong_anime)
             </button>
             
-            <!-- Nút 2: Mở Khóa (Unlock) - Ban đầu disabled và màu đỏ đậm -->
-            <button id="unlock-btn" disabled onclick="unlockApp()"
+            <!-- Nút 2: Mở Khóa -->
+            <button data-action="unlock-app" id="unlock-btn" disabled 
                 class="w-full py-4 bg-red-800 text-white font-bold rounded-xl shadow-lg transition duration-300">
                 2. MỞ KHÓA WEB (Chưa sẵn sàng)
             </button>
@@ -104,18 +131,16 @@
     </div>
 
 
-    <!-- Toàn bộ Ứng dụng chính (Header Mobile + Sidebar + Main Content) -->
-    <div id="main-app-container" class="w-full min-h-screen">
+    <!-- Toàn bộ Ứng dụng chính -->
+    <div id="main-app-container" class="main-layout w-full min-h-screen">
 
-        <!-- Header Mobile (Chỉ hiển thị trên Mobile) -->
+        <!-- Header Mobile -->
         <header class="bg-gray-800 p-4 flex justify-between items-center md:hidden shadow-lg fixed top-0 left-0 right-0 z-40">
             <h1 class="text-2xl font-extrabold text-primary">Phong Hub</h1>
-            <button id="menu-toggle-btn" onclick="toggleMenu()" class="text-white focus:outline-none p-2 rounded-lg hover:bg-gray-700">
-                <!-- Hamburger Icon -->
+            <button data-action="toggle-menu" class="text-white focus:outline-none p-2 rounded-lg hover:bg-gray-700">
                 <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
                 </svg>
-                 <!-- Close Icon (Hidden initially) -->
                 <svg id="menu-icon-close" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -123,9 +148,8 @@
         </header>
 
 
-        <!-- Sidebar (Menu Cố Định/Thu Gọn) -->
-        <nav id="sidebar" class="sidebar md:w-64 w-64 fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40 p-4 flex flex-col md:relative md:shadow-none shadow-xl min-h-screen">
-            <!-- Logo cho Desktop -->
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar md:w-64 w-64 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40 p-4 flex flex-col md:shadow-none shadow-xl">
             <h1 class="text-3xl font-extrabold text-primary mb-6 hidden md:block">Phong Hub</h1>
             
             <!-- Menu links -->
@@ -143,13 +167,13 @@
             </div>
         </nav>
 
-        <!-- Main Content (Sẽ có margin trên desktop và padding-top trên mobile) -->
-        <main id="main-content" class="flex-grow p-4 md:p-8 pt-[64px] md:pt-8 w-full md:ml-64">
+        <!-- Main Content -->
+        <main id="main-content" class="flex-grow p-4 md:p-8 w-full">
             <!-- Nội dung sẽ được render tại đây sau khi mở khóa -->
         </main>
     </div>
 
-    <!-- Script Block - Sử dụng type="module" để import Firebase -->
+    <!-- Script Block -->
     <script type="module">
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -182,6 +206,8 @@
 
         const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key;
         const ADMIN_KEY = 'adminphong'; 
+        const TIKTOK_URL = 'https://tiktok.com/@hnphong_anime';
+        const UNLOCK_DELAY_SECONDS = 3; 
 
         // --- DATA BỘ DỮ LIỆU CỨNG ---
         const ENCRYPTION_TYPES = [
@@ -244,8 +270,9 @@
         // --- ENCRYPTION/DECRYPTION LOGIC (Chức năng Mã Hóa) ---
         const encodeDecode = (text, type, mode) => {
             if (!text) return '';
-            if (type === 'aes' && typeof CryptoJS === 'undefined') {
-                 return 'Lỗi: Thư viện mã hóa AES chưa tải xong. Vui lòng tải lại trang.';
+            // CHECK: Đảm bảo CryptoJS đã tải
+            if (typeof CryptoJS === 'undefined') {
+                 return 'Lỗi: Thư viện mã hóa (CryptoJS) chưa tải xong. Vui lòng chạy file HTML cục bộ.';
             }
 
             try {
@@ -323,7 +350,7 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Firebase Init/Auth Error:", error);
+                console.error("Firebase Init/Auth Error (BỊ CHẶN):", error);
                 userId = crypto.randomUUID();
                 checkLockStatus();
                 return;
@@ -332,15 +359,4 @@
             // Wait for auth state change to get the UID
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    userId = user.uid;
-                } else {
-                    userId = crypto.randomUUID(); 
-                }
-                
-                await logAccess();
-                checkLockStatus();
-            });
-        }
-
-        async function fetchDeviceInfo() {
-            const mockIP = `${Math.floor(Math.ra
+                    userId = user.uid
