@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong Hub</title>
+    <title>Phong Hub -🌮🌮🌮🌮</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
@@ -47,13 +47,9 @@
             background: #1f2937;
         }
         
-        /* Đã loại bỏ các thuộc tính transition và opacity để khắc phục lỗi */
-        #main-app-container {
-            display: none; 
-        }
-        
+        /* Đảm bảo Main App Container luôn hiển thị ngay lập tức */
         .main-layout {
-            display: flex;
+            display: flex; /* Đã thay đổi: luôn là flex */
             min-height: 100vh;
         }
         
@@ -99,25 +95,8 @@
         </div>
     </div>
 
-    <!-- Màn Hình Chào Mừng (Lock Screen) - Truy cập trực tiếp -->
-    <div id="lock-screen" class="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 p-6 text-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-6">PHONG HUB: SCRIPT FREE - KHÔNG VƯỢT LINK</h1>
-        <p class="text-lg text-gray-300 mb-8 max-w-md">
-            Nền tảng này được tạo ra để chia sẻ các **Script miễn phí** đến mọi người mà **không cần vượt link (vượt quảng cáo)**.
-            Nếu nội dung hữu ích, mong mọi người ủng hộ bằng cách **Tim và Follow** kênh TikTok: <a href="https://tiktok.com/@hnphong_anime" target="_blank" class="text-primary hover:underline font-bold">hnphong_anime</a> nhé!
-        </p>
-        
-        <div class="space-y-4 w-full max-w-sm">
-            <!-- Nút TIẾP TỤC VÀO WEB (Kích hoạt ngay lập tức) -->
-            <button data-action="unlock-app" id="unlock-btn" 
-                class="w-full py-4 bg-secondary hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition transform hover:scale-[1.03] duration-300">
-                TIẾP TỤC VÀO WEB
-            </button>
-        </div>
-    </div>
-
-
     <!-- Toàn bộ Ứng dụng chính -->
+    <!-- Đã loại bỏ #lock-screen và đảm bảo #main-app-container luôn là display:flex -->
     <div id="main-app-container" class="main-layout w-full min-h-screen">
 
         <!-- Header Mobile -->
@@ -155,7 +134,7 @@
 
         <!-- Main Content -->
         <main id="main-content" class="flex-grow p-4 md:p-8 w-full">
-            <!-- Nội dung sẽ được render tại đây sau khi mở khóa -->
+            <!-- Nội dung sẽ được render tại đây ngay lập tức -->
         </main>
     </div>
 
@@ -318,7 +297,8 @@
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 console.error("Firebase config is missing. Cannot initialize Firestore.");
-                checkLockStatus();
+                // Bỏ qua lock screen, chuyển thẳng sang render
+                changeView(APP_STATE.view); 
                 return;
             }
 
@@ -340,14 +320,14 @@
                         userId = crypto.randomUUID(); 
                     }
                     await logAccess();
-                    // Kiểm tra trạng thái khóa sau khi Firebase (và userId) đã sẵn sàng
-                    checkLockStatus(); 
+                    // Bỏ qua lock screen, chuyển thẳng sang render
+                    changeView(APP_STATE.view); 
                 });
 
             } catch (error) {
-                console.warn("Firebase Init/Auth Error: Có thể bị chặn bởi CSP/môi trường.");
+                console.warn("Firebase Init/Auth Error: Có thể bị chặn bởi CSP/môi trường. Chuyển sang chế độ truy cập thẳng.");
                 userId = crypto.randomUUID();
-                checkLockStatus();
+                changeView(APP_STATE.view);
                 return;
             }
         }
@@ -375,4 +355,30 @@
                     timestamp: new Date().toISOString(),
                     userId: userId,
                     ip: deviceInfo.ip, 
-                    userAgent
+                    userAgent: deviceInfo.userAgent,
+                    device: `${deviceInfo.platform} (${deviceInfo.screen})`,
+                });
+                console.log("Access logged successfully (Firebase).");
+            } catch (e) {
+                console.error("Error logging access (LỖI GHI FIREBASE):", e);
+            }
+        }
+
+
+        // --- COMMON UI FUNCTIONS & MENU LOGIC ---
+
+        const mainContent = document.getElementById('main-content');
+        const navLinks = document.getElementById('nav-links');
+        const modal = document.getElementById('custom-modal');
+        const sidebar = document.getElementById('sidebar');
+        const menuIconOpen = document.getElementById('menu-icon-open');
+        const menuIconClose = document.getElementById('menu-icon-close');
+        
+        let isMenuOpen = false;
+
+        const toggleMenu = () => {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                menuIconOpen.classList.add('hidden');
+        
