@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong YTB lấy script</title>
+    <title>Phong Hub - Công Cụ & Giải Trí</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        
         :root {
             --primary: #8b5cf6; /* Violet */
             --primary-dark: #7c3aed;
@@ -34,6 +36,7 @@
             background-color: #374151;
             color: #fff;
         }
+        /* Custom Scrollbar for better UX */
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
@@ -57,7 +60,7 @@
             <h3 id="modal-title" class="text-xl font-bold mb-3 text-white">Thông báo</h3>
             <p id="modal-content" class="text-gray-300 mb-6"></p>
             <div id="modal-actions" class="flex justify-end space-x-3">
-                <button id="modal-close" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
+                <button id="modal-close" onclick="hideModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
             </div>
         </div>
     </div>
@@ -80,9 +83,9 @@
 
     <!-- Main Content -->
     <main id="main-content" class="flex-grow p-4 md:p-8">
-        <!-- Content will be rendered here -->
-        <div class="flex items-center justify-center h-full min-h-[300px]">
-            <p id="loading-message" class="text-xl text-gray-400">Đang khởi tạo...</p>
+        <!-- Message này sẽ bị xóa ngay khi JS khởi tạo thành công -->
+        <div id="initial-loading-container" class="flex items-center justify-center h-full min-h-[300px]">
+            <p id="loading-message" class="text-xl text-gray-400 animate-pulse">Đang tải nội dung, vui lòng chờ...</p>
         </div>
     </main>
 
@@ -94,9 +97,8 @@
                 key: "Roland",
             },
             keyPremium: {
-                // Mặc định là false. Trạng thái chỉ giữ trong phiên làm việc hiện tại.
+                // Trạng thái chỉ giữ trong phiên làm việc hiện tại.
                 isValid: false, 
-                // Tạo UUID giả định vì không thể lưu trữ cục bộ an toàn
                 currentUserUUID: crypto.randomUUID(), 
             },
             scripts: {
@@ -271,13 +273,5 @@
             document.getElementById('modal-actions').innerHTML = actionsHtml || `<button id="modal-close-simple" onclick="hideModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>`;
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            document.getElementById('modal-close-simple')?.focus();
-        };
-
-        const hideModal = () => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        const copyToClipboard = (text, message = 'Đã Sao Chép >^<') => {
-            if (!text || text.tri
+            // Gán focus cho nút đóng để tiện dùng phím Enter
+            document.getElementById('modal-actions').querySelector('button')?.foc
