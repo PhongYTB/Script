@@ -299,8 +299,10 @@
                 switch (type) {
                     case 'base64':
                         if (mode === 'encrypt') {
-                            return btoa(unescape(encodeURIComponent(text)));
+                            // Mã hóa Base64 an toàn cho Unicode (tiếng Việt)
+                            return btoa(unescape(encodeURIComponent(text))); 
                         } else {
+                            // Giải mã Base64 an toàn cho Unicode (tiếng Việt)
                             return decodeURIComponent(escape(atob(text)));
                         }
                     case 'url':
@@ -356,16 +358,9 @@
                         userId = crypto.randomUUID(); 
                     }
                     await logAccess();
-                    checkLockStatus();
+                    // Kiểm tra trạng thái khóa sau khi Firebase (và userId) đã sẵn sàng
+                    checkLockStatus(); 
                 });
 
             } catch (error) {
-                console.warn("Firebase Init/Auth Error: Có thể bị chặn bởi CSP/môi trường.");
-                userId = crypto.randomUUID();
-                checkLockStatus();
-                return;
-            }
-        }
-
-        async function fetchDeviceInfo() {
-            const mockIP = `${Math.floor(Math
+                console.warn("Firebase Init/Auth Error: Có thể b
