@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong Hub</title>
+    <title>Phong Hub 🐧🐿️</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
@@ -47,12 +47,11 @@
             background: #1f2937;
         }
         #main-app-container {
-            display: none;
+            display: none; /* Initial state, will be set to 'flex' on unlock */
             opacity: 0;
             transition: opacity 0.5s;
         }
         #main-app-container.visible {
-            display: flex;
             opacity: 1;
         }
         .main-layout {
@@ -376,5 +375,4 @@
                 
                 await addDoc(logsCollectionRef, {
                     timestamp: new Date().toISOString(),
-                    userId: userId,
-                    ip: dev
+                
