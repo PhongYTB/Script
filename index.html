@@ -203,6 +203,11 @@
 
         const encodeDecode = (text, type, mode) => {
             if (!text) return '';
+            // Kiểm tra xem CryptoJS đã tải thành công chưa
+            if (type === 'aes' && typeof CryptoJS === 'undefined') {
+                 return 'Lỗi: Thư viện mã hóa AES chưa tải xong. Vui lòng tải lại trang.';
+            }
+
             try {
                 switch (type) {
                     case 'base64':
@@ -212,7 +217,6 @@
                             if (text.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(text)) {
                                 return 'Lỗi: Chuỗi Base64 không hợp lệ.';
                             }
-                            // Sử dụng .toString(CryptoJS.enc.Utf8) để đảm bảo kết quả giải mã
                             return CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8);
                         }
                     case 'url':
@@ -273,5 +277,4 @@
             document.getElementById('modal-actions').innerHTML = actionsHtml || `<button id="modal-close-simple" onclick="hideModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>`;
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            // Gán focus cho nút đóng để tiện dùng phím Enter
-            document.getElementById('modal-actions').querySelector('button')?.foc
+   
