@@ -50,6 +50,12 @@
         .copy-btn {
             transition: all 0.3s;
         }
+
+        /* Đảm bảo nội dung chính được hiển thị sau khi loading container bị xóa */
+        #main-content {
+            opacity: 1; 
+            transition: opacity 0.5s;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -83,14 +89,14 @@
 
     <!-- Main Content -->
     <main id="main-content" class="flex-grow p-4 md:p-8">
-        <!-- Message này sẽ bị xóa ngay khi JS khởi tạo thành công -->
-        <div id="initial-loading-container" class="flex items-center justify-center h-full min-h-[300px]">
+        <!-- Message này được đặt ở đây và sẽ bị xóa NGAY LẬP TỨC khi script chạy -->
+        <div id="initial-loading-container" class="absolute inset-0 bg-bg-dark flex items-center justify-center z-40">
             <p id="loading-message" class="text-xl text-gray-400 animate-pulse">Đang tải nội dung, vui lòng chờ...</p>
         </div>
     </main>
 
     <script>
-        // --- GLOBAL STATE (Không dùng localStorage) ---
+        // --- GLOBAL STATE ---
         const APP_STATE = {
             view: 'gioi-thieu', // current active section
             encryption: {
@@ -103,11 +109,11 @@
             },
             scripts: {
                 currentCategory: 'brainrot',
+                searchQuery: '', // Thêm trạng thái tìm kiếm
             },
         };
 
-        // --- DATA BỘ DỮ LIỆU CỨNG (HARDCODED DATA) ---
-
+        // --- DATA BỘ DỮ LIỆU CỨNG ---
         const ENCRYPTION_TYPES = [
             { id: 'base64', name: 'Base64 (Mã hóa cơ bản)' },
             { id: 'url', name: 'URL Encoding (Mã hóa Web)' },
@@ -116,6 +122,7 @@
         ];
 
         const SCRIPT_DATA = {
+            // Dữ liệu Scripts giữ nguyên như trước
             brainrot: [
                 { name: "Lemon Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()' },
                 { name: "Arbix Hub New", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()' },
@@ -197,13 +204,12 @@
         ];
 
 
-        // --- ENCRYPTION/DECRYPTION LOGIC (CHẠY HOÀN TOÀN CỤC BỘ) ---
+        // --- ENCRYPTION/DECRYPTION LOGIC ---
 
         const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key; // "Roland"
 
         const encodeDecode = (text, type, mode) => {
             if (!text) return '';
-            // Kiểm tra xem CryptoJS đã tải thành công chưa
             if (type === 'aes' && typeof CryptoJS === 'undefined') {
                  return 'Lỗi: Thư viện mã hóa AES chưa tải xong. Vui lòng tải lại trang.';
             }
@@ -214,6 +220,7 @@
                         if (mode === 'encrypt') {
                             return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
                         } else {
+                            // Cần kiểm tra định dạng Base64 trước khi giải mã
                             if (text.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(text)) {
                                 return 'Lỗi: Chuỗi Base64 không hợp lệ.';
                             }
@@ -233,13 +240,16 @@
                             if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
                                 const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
                                 const max = (code >= 65 && code <= 90) ? 90 : (code >= 97 && code <= 122) ? 122 : 57;
-                                let newCode = code + shift;
-                                if (newCode > max) {
-                                    newCode = base + (newCode - max - 1);
-                                } else if (newCode < base) {
-                                    newCode = max - (base - newCode - 1);
+                                const wrap = (max - base) + 1; // 26 for letters, 10 for numbers
+                                
+                                let newCode = code - base;
+                                newCode = (newCode + shift) % wrap;
+                                
+                                if (newCode < 0) {
+                                    newCode += wrap;
                                 }
-                                return String.fromCharCode(newCode);
+
+                                return String.fromCharCode(newCode + base);
                             }
                             return char; 
                         }).join('');
@@ -252,7 +262,9 @@
                                 return 'Lỗi: Key AES sai hoặc dữ liệu không phải mật mã AES hợp lệ.';
                             }
                             try {
-                                return bytes.toString(CryptoJS.enc.Utf8);
+                                const result = bytes.toString(CryptoJS.enc.Utf8);
+                                // Kiểm tra nếu kết quả là chuỗi rỗng sau khi giải mã thất bại một phần
+                                return result || 'Lỗi: Giải mã thành công nhưng kết quả là chuỗi rỗng.';
                             } catch (e) {
                                 return 'Lỗi: Dữ liệu giải mã không phải là UTF-8 hợp lệ.';
                             }
@@ -269,12 +281,4 @@
 
         const mainContent = document.getElementById('main-content');
         const navLinks = document.getElementById('nav-links');
-        const modal = document.getElementById('custom-modal');
-
-        const showModal = (title, content, actionsHtml = '') => {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-content').innerHTML = content;
-            document.getElementById('modal-actions').innerHTML = actionsHtml || `<button id="modal-close-simple" onclick="hideModal()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>`;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-   
+        const modal = document.getElemen
