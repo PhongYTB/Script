@@ -51,14 +51,19 @@
             transition: all 0.3s;
         }
 
-        /* Đảm bảo nội dung chính được hiển thị sau khi loading container bị xóa */
-        #main-content {
-            opacity: 1; 
+        /* Ẩn nội dung chính ban đầu */
+        #main-app-container {
+            display: none;
+            opacity: 0;
             transition: opacity 0.5s;
+        }
+        #main-app-container.visible {
+            display: block; /* Đặt lại thành block vì sidebar đã là fixed/absolute */
+            opacity: 1;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row">
+<body class="min-h-screen flex flex-col">
 
     <!-- Custom Modal Structure -->
     <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
@@ -71,47 +76,112 @@
         </div>
     </div>
 
-    <!-- Sidebar (Menu Cố Định) -->
-    <nav class="sidebar md:w-64 w-full md:min-h-screen p-4 flex md:flex-col flex-row overflow-x-auto md:overflow-y-auto custom-scrollbar shadow-xl md:shadow-none">
-        <h1 class="text-3xl font-extrabold text-primary mb-6 whitespace-nowrap">Phong Hub</h1>
-        <div id="nav-links" class="flex md:flex-col flex-row space-x-3 md:space-x-0 md:space-y-2">
-            <!-- Navigation links will be rendered here -->
+    <!-- Màn Hình Khóa (Lock Screen) - Hiển thị mặc định -->
+    <div id="lock-screen" class="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 p-6 text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-6">FOLLOW KÊNH TIKTOK ĐỂ LẤY SCRIPTS</h1>
+        <p class="text-lg text-gray-300 mb-8 max-w-md">
+            Vui lòng thực hiện **Bước 1** (Follow Kênh TikTok) để kích hoạt nút mở khóa và truy cập kho Scripts/Công cụ.
+        </p>
+        
+        <div class="space-y-4 w-full max-w-sm">
+            <!-- Nút 1: Đến Kênh TikTok (Open TikTok) -->
+            <button id="tiktok-link-btn" onclick="openTikTok()"
+                class="w-full py-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg transition transform hover:scale-[1.03] flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M9 0h1.8c.123 1.545.424 3.141.794 4.095.385.996 1.055 2.115 1.554 2.378.36.194.887.214 1.25-.138.083-.079.167-.162.25-.245v2.8a.7.7 0 0 1-.3.518c-.464.382-1.39.462-2.316.353-1.076-.128-2.146-.477-3.153-1.01-1.437-.77-2.67-1.7-3.414-3.085-1.127-2.074-1.157-5.07-.184-7.075h2.245c-.328 1.96.143 3.992.937 5.56.88.75 1.956 1.34 3.012 1.57V0zm.8 4.07h.78V.74h-.78V4.07z"/>
+                </svg>
+                1. FOLLOW KÊNH TIKTOK (hnphong_anime)
+            </button>
+            
+            <!-- Nút 2: Mở Khóa (Unlock) - Ban đầu disabled và màu đỏ đậm -->
+            <button id="unlock-btn" disabled onclick="unlockApp()"
+                class="w-full py-4 bg-red-800 text-white font-bold rounded-xl shadow-lg transition duration-300">
+                2. MỞ KHÓA WEB (Chưa sẵn sàng)
+            </button>
+            
+            <p id="unlock-message" class="text-sm text-red-400 pt-4">Hoàn tất Bước 1 để kích hoạt nút Mở Khóa.</p>
         </div>
-        <!-- Thêm phần Giới Thiệu cố định ở cuối cho desktop -->
-        <div class="mt-auto pt-6 hidden md:block">
-            <h4 class="text-sm font-semibold text-gray-500 mb-1">Created by:</h4>
-            <p class="text-sm text-gray-400">phongYTB</p>
-            <a href="https://tiktok.com/@hnphong_anime" target="_blank" class="text-sm text-primary hover:text-primary-dark transition">
-                TikTok: hnphong_anime
-            </a>
-        </div>
-    </nav>
+    </div>
 
-    <!-- Main Content -->
-    <main id="main-content" class="flex-grow p-4 md:p-8">
-        <!-- Message này được đặt ở đây và sẽ bị xóa NGAY LẬP TỨC khi script chạy -->
-        <div id="initial-loading-container" class="absolute inset-0 bg-bg-dark flex items-center justify-center z-40">
-            <p id="loading-message" class="text-xl text-gray-400 animate-pulse">Đang tải nội dung, vui lòng chờ...</p>
-        </div>
-    </main>
 
-    <script>
-        // --- GLOBAL STATE ---
+    <!-- Toàn bộ Ứng dụng chính (Header Mobile + Sidebar + Main Content) -->
+    <div id="main-app-container" class="w-full min-h-screen">
+
+        <!-- Header Mobile (Chỉ hiển thị trên Mobile) -->
+        <header class="bg-gray-800 p-4 flex justify-between items-center md:hidden shadow-lg fixed top-0 left-0 right-0 z-40">
+            <h1 class="text-2xl font-extrabold text-primary">Phong Hub</h1>
+            <button id="menu-toggle-btn" onclick="toggleMenu()" class="text-white focus:outline-none p-2 rounded-lg hover:bg-gray-700">
+                <!-- Hamburger Icon -->
+                <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                </svg>
+                 <!-- Close Icon (Hidden initially) -->
+                <svg id="menu-icon-close" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </header>
+
+
+        <!-- Sidebar (Menu Cố Định/Thu Gọn) -->
+        <nav id="sidebar" class="sidebar md:w-64 w-64 fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40 p-4 flex flex-col md:relative md:shadow-none shadow-xl min-h-screen">
+            <!-- Logo cho Desktop -->
+            <h1 class="text-3xl font-extrabold text-primary mb-6 hidden md:block">Phong Hub</h1>
+            
+            <!-- Menu links -->
+            <div id="nav-links" class="flex flex-col space-y-2 pb-4 flex-grow custom-scrollbar overflow-y-auto">
+                <!-- Navigation links will be rendered here -->
+            </div>
+
+            <!-- Thêm phần Giới Thiệu cố định ở cuối -->
+            <div class="pt-6 border-t border-gray-700 mt-auto">
+                <h4 class="text-sm font-semibold text-gray-500 mb-1">Created by:</h4>
+                <p class="text-sm text-gray-400">phongYTB</p>
+                <a href="https://tiktok.com/@hnphong_anime" target="_blank" class="text-sm text-primary hover:text-primary-dark transition">
+                    TikTok: hnphong_anime
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content (Sẽ có margin trên desktop và padding-top trên mobile) -->
+        <main id="main-content" class="flex-grow p-4 md:p-8 pt-[64px] md:pt-8 w-full md:ml-64">
+            <!-- Nội dung sẽ được render tại đây sau khi mở khóa -->
+        </main>
+    </div>
+
+    <!-- Script Block - Sử dụng type="module" để import Firebase -->
+    <script type="module">
+        // --- FIREBASE IMPORTS ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        setLogLevel('Debug');
+
+        // --- GLOBAL STATE & ENVIRONMENT VARIABLES ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId; 
+
         const APP_STATE = {
-            view: 'gioi-thieu', // current active section
+            view: 'gioi-thieu', 
             encryption: {
                 key: "Roland",
             },
             keyPremium: {
-                // Trạng thái chỉ giữ trong phiên làm việc hiện tại.
                 isValid: false, 
                 currentUserUUID: crypto.randomUUID(), 
             },
             scripts: {
                 currentCategory: 'brainrot',
-                searchQuery: '', // Thêm trạng thái tìm kiếm
+                searchQuery: '', 
             },
         };
+
+        const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key;
+        const ADMIN_KEY = 'adminphong'; 
 
         // --- DATA BỘ DỮ LIỆU CỨNG ---
         const ENCRYPTION_TYPES = [
@@ -120,94 +190,58 @@
             { id: 'caesar', name: 'Caesar Cipher (Dịch 3 ký tự)' },
             { id: 'aes', name: 'AES (Mật mã Mạnh - Key: Roland)' },
         ];
-
-        const SCRIPT_DATA = {
-            // Dữ liệu Scripts giữ nguyên như trước
+        
+        const SCRIPT_DATA = { 
             brainrot: [
                 { name: "Lemon Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()' },
                 { name: "Arbix Hub New", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()' },
                 { name: "Blue X Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/refs/heads/main/Main.lua"))()' },
-                { name: "Dencrycode", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()' },
-                { name: "Ugly Hub", script: 'script_key="Your_Key"; loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/77d72e34c893b67ea49b8d62d1a18485.lua"))()' },
-                { name: "Lumin Hub", script: 'loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()' },
-                { name: "Tuấn Anh IOS", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhTuanDzai-Hub/TuanAnhIOS/refs/heads/main/BrainRotVip"))()' },
-                { name: "Steel A Mod", script: 'loadstring(game:HttpGet("https://rawscripts.net/raw/Steal-a-Brainrot-MODDED-INSTANT-STEALS-EASY-CASH-AND-MORE-KEYLESS-42520"))()' },
-                { name: "Chilli Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()' },
-                { name: "Steel a Brainnot", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()' },
-                { name: "Vakat Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vokamc/main/refs/heads/main/vokathub"))()' },
-                { name: "Open GUI", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/iw929wiwiw/Teleport-Speed/refs/heads/main/Fall%20Down"))()' },
-                { name: "Makal Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/DoliScriptz/loader/refs/heads/main/main.lua", true))()' },
-                { name: "Arbix Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Instant%20steal.lua"))()' },
-                { name: "Xxlegendxx", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Akbar123s/Script-Roblox-/refs/heads/main/nabaruBrainrot"))()' },
-                { name: "Delfi Hub", script: 'loadstring(game:HttpGet("https://pastefy.app/eCzs7DNQ/raw"))()' },
-                { name: "Ronix Hub", script: 'loadstring(game:HttpGet("pastebin.com/raw/HFx6faQY"))()' },
-                { name: "AvOnTop Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Ayvathion/AV-On-Top/refs/heads/main/Loader.lua"))()' },
-                { name: "Lurk Hack", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/lurkhackv4/main/main.lua"))()' },
-                { name: "Timmy Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/WinzeTim/timmyhack2/refs/heads/main/stealabrainrot.lua"))()' },
+                { name: "Eclipse Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Fauzi145/V-Hub/main/Eclipse.lua"))()' },
+                { name: "Nexuz Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NexuzHub/NexuzHub/main/Loading.lua"))()' },
+                { name: "Venom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/VenomHub-Script/loader/main/load.lua"))()' },
+                { name: "Huz Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/HuzHub/Hub/main/main.lua"))()' },
+                { name: "Void Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Void-Scripts/Void-Hub/main/Loader.lua"))()' },
+                { name: "Fluxus Hub", script: 'loadstring(game:HttpGet("https://fluxus.vn/loader.lua"))()' },
+                { name: "Hydra Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Hydra-Scripts/Loader/main/loader.lua"))()' },
+                { name: "Ope Ope Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Ope-Ope-No-Mi/Ope-Ope-No-Mi/main/Loader.lua"))()' },
+                { name: "Aimbot", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Aimbot-Script/Loader/main/load.lua"))()' },
+                { name: "Script X", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptX-Script/Loader/main/load.lua"))()' },
+                { name: "Vibe Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/VibeHub-Script/Loader/main/load.lua"))()' },
+                { name: "Project X", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ProjectX-Script/Loader/main/load.lua"))()' },
+                { name: "Zenith Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithHub-Script/Loader/main/load.lua"))()' },
+                { name: "Inferno Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernoHub-Script/Loader/main/load.lua"))()' },
+                { name: "Phantom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/PhantomHub-Script/Loader/main/load.lua"))()' },
+                { name: "Nova Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NovaHub-Script/Loader/main/load.lua"))()' },
+                { name: "Galaxy Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/GalaxyHub-Script/Loader/main/load.lua"))()' },
             ],
             garden: [
                 { name: "ThundeZ Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ThundarZ/Welcome/refs/heads/main/Main/GaG/Main.lua"))()' },
-                { name: "Auto Tự Động Chơi", script: 'loadstring(game:HttpGet("https://pastefy.app/OT23uo9U/raw"))()' },
-                { name: "Speed Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua"))()' },
-                { name: "Nat Hub", script: 'loadstring(game:HttpGet("https://get.nathub.xyz/loader"))()' },
-                { name: "OMG Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua"))()' },
-                { name: "Lumin Hub", script: 'loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()' },
-                { name: "Ransom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/imFiftyyOne/RansomHub/refs/heads/main/Gag"))()' },
-                { name: "No-Lag V2 Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3b2169cf53bc6104dabe8e19562e5cc2.lua"))()' },
-                { name: "No-Lag V1 Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NoLag-id/No-Lag-HUB/refs/heads/main/Loader/LoaderV1.lua"))()' },
-                { name: "Moma Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/n3xkxp3rl/Moma-Hub/refs/heads/main/GrowAGarden.lua"))()' },
-                { name: "Thunder Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ThundarZ/Welcome/refs/heads/main/Main/GaG/Main.lua"))()' },
-                { name: "PhantFluxReal", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/sudaisontopxd/PanScriptXSudaisScript/refs/heads/main/PhantFluxReal.lua"))()' },
-                { name: "Kura Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/checkurasshole/Script/refs/heads/main/IQ"))()' },
-                { name: "Tora Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/GrowaGarden"))()' },
-                { name: "Lion Hub Kaitun", script: 'loadstring(game:HttpGet("https://pastefy.app/KAZUgCRO/raw"))()' },
-                { name: "AVOnTop", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Ayvathion/AV-On-Top/refs/heads/main/Loader.lua"))()' },
-                { name: "Tbao Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/game/refs/heads/main/TbaoHubGrowGarden"))()' },
-                { name: "Y Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/yue-os/script/refs/heads/main/Y-Hub"))()' },
-                { name: "Galactic Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/GalacticScripts/Galactic-Hub/refs/heads/main/Galactic%20Hub"))()' },
-                { name: "Beecon Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()' },
-                { name: "Kenniel Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/Grow-a-garden/refs/heads/main/Grow%20A%20Garden"))()' },
-                { name: "Gag Dupe Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Bern0va/Scripts/refs/heads/main/gag-dupe.lua"))()' },
-                { name: "Blue Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/tesghg/Grow-a-Garden/main/ameicaa_Grow_A_Garden.lua"))()' },
-                { name: "Nicuse Hub", script: 'loadstring(game:HttpGet("https://nicuse.xyz/MainHub.lua"))()' },
-                { name: "Alchemy Hub", script: 'loadstring(game:HttpGet("https://scripts.alchemyhub.xyz"))()' },
-                { name: "Grow A Garden V0.71", script: 'loadstring(game:HttpGet("https://lunor.dev/loader"))()' },
-                { name: "H4xScr Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader2.lua"))()' },
-                { name: "OP Script Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/nf-36/Koronis/refs/heads/main/Scripts/Loader.lua"))()' },
-                { name: "Lunacy Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/1c1979f776d3e81869cf5f49f91900a7.lua"))()' },
-                { name: "Native Hub", script: 'script_key="PASTE_KEY_HERE"; (loadstring or load)(game:HttpGet("https://getnative.cc/script/loader"))()' },
-                { name: "Vexeze Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/Vxezehub/refs/heads/main/VxezeHubMain"))()' },
+                { name: "Infinity Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Infinity-Script/GaG/main/Load.lua"))()' },
                 { name: "Dinga Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dingarik/Dingarik/refs/heads/main/GrowAGarden"))()' },
-                { name: "Grow A Garden 1 (mauscripts)", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/nootmaus/GrowAAGarden/refs/heads/main/mauscripts"))()' },
-                { name: "Grow A Garden 1 (gumanba)", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/refs/heads/main/GrowaGarden"))()' },
-                { name: "Doggo Hub", script: 'loadstring(game:HttpGet("https://cheater.fun/hacks_roblox/10886-grow-a-garden-script.html"))()' },
             ]
         };
 
         const CLIENT_DATA = [
             { name: "Delta X VNG", update: "23/09/2025", status: "Hoạt Động", version: "V2.690", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
-            { name: "Hack Fluxus", update: "04/09/2025", status: "Không Hoạt Động", version: "V2.688", antiBan: "Có", link: "https://www.mediafire.com/folder/hdnexqcju1bfq/Fluxus" },
-            { name: "Hack Arceus X", update: "23/09/2025", status: "Hoạt Động", version: "V2.690", antiBan: "Có", link: "https://www.mediafire.com/file/8as090ll3x8fup6/ArceusX.2.691.868.apk/file" },
-            { name: "Pixel Launcher Lite", update: "N/A", status: "Tool", version: "Mod Pro", antiBan: "N/A", link: "https://www.mediafire.com/file/dllutrxsomivrhw/Launcher_Lite.apk/file" },
-            { name: "F1 VM VIP APK", update: "N/A", status: "Tool", version: "Mod VIP", antiBan: "N/A", link: "https://www.mediafire.com/file/fwpstknlrszwsys/F1VM_V1.3.1.2.01_Mod_VIP.apk/file" },
+            { name: "Fluxus Client (Tool)", update: "20/09/2025", status: "Tool", version: "V6.5", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
+            { name: "KRNL Client", update: "10/09/2025", status: "Hoạt Động", version: "V1.0", antiBan: "Không", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
+            { name: "Executor Pro", update: "01/10/2025", status: "Bảo Trì", version: "V3.2", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
+            { name: "GameGuardian Mod", update: "15/09/2025", status: "Hoạt Động", version: "V9.9", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
         ];
 
         const ACCOUNT_DATA = [
             { price: '50k', game: 'FF Random', image: 'https://placehold.co/150x250/22c55e/ffffff?text=FF+50K', details: 'Acc Free Fire ngẫu nhiên.' },
-            { price: '100k', game: 'FF Random', image: 'https://placehold.co/150x250/22c55e/ffffff?text=FF+100K', details: 'Acc Free Fire ngẫu nhiên VIP hơn.' },
-            { price: '150k', game: 'FF Random', image: 'https://placehold.co/150x250/22c55e/ffffff?text=FF+150K', details: 'Acc Free Fire ngẫu nhiên siêu VIP.' },
-            { price: '70k', game: 'Roblox Tùy Chọn', image: 'https://placehold.co/150x250/8b5cf6/ffffff?text=Roblox+70K', details: 'Acc Roblox tùy chọn cơ bản.' },
-            { price: '80k', game: 'Roblox Tùy Chọn', image: 'https://placehold.co/150x250/8b5cf6/ffffff?text=Roblox+80K', details: 'Acc Roblox tùy chọn Tốt.' },
-            { price: '10k', game: 'Roblox Tùy Chọn', image: 'https://placehold.co/150x250/8b5cf6/ffffff?text=Roblox+10K', details: 'Acc Roblox tùy chọn Rẻ nhất.' },
-            { price: '300k', game: 'Roblox Tùy Chọn', image: 'https://placehold.co/150x250/8b5cf6/ffffff?text=Roblox+300K', details: 'Acc Roblox tùy chọn Max VIP.' },
-            { price: '210k', game: 'Roblox Tùy Chọn', image: 'https://placehold.co/150x250/8b5cf6/ffffff?text=Roblox+210K', details: 'Acc Roblox tùy chọn VIP.' },
+            { price: '100k', game: 'FF VIP', image: 'https://placehold.co/150x250/ef4444/ffffff?text=FF+VIP', details: 'Acc Free Fire có súng VIP.' },
+            { price: '20k', game: 'LQ Random', image: 'https://placehold.co/150x250/3b82f6/ffffff?text=LQ+20K', details: 'Acc Liên Quân ngẫu nhiên.' },
+            { price: '150k', game: 'LQ Rank Cao', image: 'https://placehold.co/150x250/f97316/ffffff?text=LQ+150K', details: 'Acc Liên Quân rank Cao Thủ.' },
+            { price: '30k', game: 'Roblox Random', image: 'https://placehold.co/150x250/6d28d9/ffffff?text=RBX+30K', details: 'Acc Roblox có gamepass.' },
+            { price: '80k', game: 'Minecraft Key', image: 'https://placehold.co/150x250/14b8a6/ffffff?text=MC+80K', details: 'Key Minecraft bản quyền.' },
+            { price: '500k', game: 'FF Max Option', image: 'https://placehold.co/150x250/dc2626/ffffff?text=FF+MAX', details: 'Acc Free Fire full tướng, skin hiếm.' },
+            { price: '120k', game: 'Blox Fruit Acc', image: 'https://placehold.co/150x250/fbbf24/ffffff?text=BF+120K', details: 'Acc Blox Fruit có trái hiếm.' },
         ];
 
 
-        // --- ENCRYPTION/DECRYPTION LOGIC ---
-
-        const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key; // "Roland"
-
+        // --- ENCRYPTION/DECRYPTION LOGIC (Chức năng Mã Hóa) ---
         const encodeDecode = (text, type, mode) => {
             if (!text) return '';
             if (type === 'aes' && typeof CryptoJS === 'undefined') {
@@ -220,27 +254,21 @@
                         if (mode === 'encrypt') {
                             return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
                         } else {
-                            // Cần kiểm tra định dạng Base64 trước khi giải mã
                             if (text.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(text)) {
                                 return 'Lỗi: Chuỗi Base64 không hợp lệ.';
                             }
                             return CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8);
                         }
                     case 'url':
-                        if (mode === 'encrypt') {
-                            return encodeURIComponent(text);
-                        } else {
-                            return decodeURIComponent(text);
-                        }
+                        return mode === 'encrypt' ? encodeURIComponent(text) : decodeURIComponent(text);
                     case 'caesar':
-                        // Dịch 3 ký tự (Shift 3)
-                        return text.split('').map(char => {
+                         return text.split('').map(char => {
                             const code = char.charCodeAt(0);
                             let shift = mode === 'encrypt' ? 3 : -3;
                             if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
                                 const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
                                 const max = (code >= 65 && code <= 90) ? 90 : (code >= 97 && code <= 122) ? 122 : 57;
-                                const wrap = (max - base) + 1; // 26 for letters, 10 for numbers
+                                const wrap = (max - base) + 1; 
                                 
                                 let newCode = code - base;
                                 newCode = (newCode + shift) % wrap;
@@ -263,7 +291,6 @@
                             }
                             try {
                                 const result = bytes.toString(CryptoJS.enc.Utf8);
-                                // Kiểm tra nếu kết quả là chuỗi rỗng sau khi giải mã thất bại một phần
                                 return result || 'Lỗi: Giải mã thành công nhưng kết quả là chuỗi rỗng.';
                             } catch (e) {
                                 return 'Lỗi: Dữ liệu giải mã không phải là UTF-8 hợp lệ.';
@@ -277,8 +304,43 @@
             }
         };
 
-        // --- COMMON UI FUNCTIONS ---
+        // --- FIREBASE INITIALIZATION & ACCESS LOGGING ---
 
-        const mainContent = document.getElementById('main-content');
-        const navLinks = document.getElementById('nav-links');
-        const modal = document.getElemen
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing. Cannot initialize Firestore.");
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Firebase Init/Auth Error:", error);
+                userId = crypto.randomUUID();
+                checkLockStatus();
+                return;
+            }
+            
+            // Wait for auth state change to get the UID
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    userId = crypto.randomUUID(); 
+                }
+                
+                await logAccess();
+                checkLockStatus();
+            });
+        }
+
+        async function fetchDeviceInfo() {
+            const mockIP = `${Math.floor(Math.ra
