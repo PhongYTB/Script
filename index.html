@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhongYTB </title>
+    <title>PhongYTB</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
@@ -210,6 +210,10 @@
         const TIKTOK_URL = document.querySelector('[data-action="open-tiktok"]')?.href || 'https://tiktok.com/@hnphong_anime'; 
         const UNLOCK_DELAY_SECONDS = 3; 
 
+        // LocalStorage Key cho cơ chế mới
+        const TIKTOK_CLICK_TIME_KEY = 'tiktokClickTime';
+        let countdownTimerId = null; // Biến để lưu ID của setTimeout
+
         // --- DATA BỘ DỮ LIỆU CỨNG ---
         const ENCRYPTION_TYPES = [
             { id: 'base64', name: 'Base64 (Mã hóa cơ bản)' },
@@ -358,9 +362,4 @@
                     } else {
                         userId = crypto.randomUUID(); 
                     }
-                    await logAccess();
-                    checkLockStatus();
-                });
-
-            } catch (error) {
-                console.warn("Firebase Init/Auth Error: Có thể bị chặn bởi 
+                    await logAcces
