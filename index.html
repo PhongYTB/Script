@@ -3,386 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phong Hub - 🥚🌮🌮</title>
+    <title>Phong Hub - Mã Hóa & Script</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tải Thư viện Crypto-JS cho mã hóa AES -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    
+    <!-- Tải CryptoJS cho mã hóa AES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        
-        :root {
-            --primary: #8b5cf6; /* Violet */
-            --primary-dark: #7c3aed;
-            --secondary: #10b981; /* Emerald */
-            --bg-dark: #1f2937;
-            --card-bg: #374151;
-        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: #e5e7eb;
+            background-color: #0d1117; 
+            color: #ffffff;
         }
-        .sidebar {
-            background-color: #111827;
-        }
-        .nav-item {
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
-        }
-        .nav-item.active {
-            border-left-color: var(--primary);
-            background-color: #374151;
-            color: #fff;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #1f2937;
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
-        /* Đảm bảo Main App Container luôn hiển thị ngay lập tức */
-        .main-layout {
-            display: flex; /* Luôn là flex */
-            min-height: 100vh;
+        .card {
+            @apply bg-gray-800 p-6 rounded-xl shadow-2xl transition duration-300;
         }
-        
-        @media (max-width: 767px) {
-            #sidebar {
-                position: fixed;
-                top: 0;
-                bottom: 0;
-                height: 100%;
-                z-index: 40;
-            }
-            #main-content {
-                 padding-top: 64px; 
-                 width: 100%;
-            }
+        .input-style {
+            @apply w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition duration-150 text-base;
         }
-        
-        @media (min-width: 768px) {
-            #sidebar {
-                position: fixed;
-                top: 0;
-                bottom: 0;
-                height: 100%;
-                z-index: 30;
-            }
-            #main-content {
-                margin-left: 16rem; 
-                padding-top: 2rem;
-            }
+        .btn-primary {
+            @apply px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.01] active:scale-[0.98];
+        }
+        .btn-copy {
+            @apply px-3 py-1 bg-green-500 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-600 transition duration-150 transform active:scale-95;
+        }
+        .nav-link {
+            @apply text-gray-300 hover:text-white transition duration-150 p-2 rounded-lg;
+        }
+        .nav-link.active {
+            @apply text-cyan-400 font-semibold border-b-2 border-cyan-400 bg-gray-700/50;
+        }
+        .gradient-text {
+            background-image: linear-gradient(to right, #34d399, #67e8f9, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .status-active { @apply bg-green-500 text-white font-bold px-3 py-1 rounded-full text-xs; }
+        .status-inactive { @apply bg-red-500 text-white font-bold px-3 py-1 rounded-full text-xs; }
+        /* Modal Styles */
+        #passwordModal {
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .modal-content {
+            background-color: #1f2937;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen">
 
-    <!-- Custom Modal Structure -->
-    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
-        <div class="bg-card-bg p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-primary">
-            <h3 id="modal-title" class="text-xl font-bold mb-3 text-white">Thông báo</h3>
-            <p id="modal-content" class="text-gray-300 mb-6"></p>
-            <div id="modal-actions" class="flex justify-end space-x-3">
-                <button data-action="close-modal" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-semibold transition">Đóng</button>
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 hidden items-center justify-center p-4">
+        <div class="modal-content card w-full max-w-sm transform transition-all duration-300 border-t-4 border-yellow-400">
+            <h3 class="text-xl font-bold text-yellow-400 mb-4">Nhập Mật Khẩu Bí Mật</h3>
+            <p class="text-gray-300 mb-3 text-sm">Vui lòng nhập mật khẩu để mở khóa nội dung ẩn:</p>
+            <input type="password" id="passwordInput" class="input-style mb-4" placeholder="Mật khẩu...">
+            <div class="flex justify-end space-x-3">
+                <button onclick="hidePasswordModal()" class="btn-secondary bg-gray-600">Hủy</button>
+                <button onclick="checkPassword()" class="btn-primary">Xác Nhận</button>
             </div>
         </div>
     </div>
 
-    <!-- Toàn bộ Ứng dụng chính -->
-    <div id="main-app-container" class="main-layout w-full min-h-screen">
-
-        <!-- Header Mobile -->
-        <header class="bg-gray-800 p-4 flex justify-between items-center md:hidden shadow-lg fixed top-0 left-0 right-0 z-40">
-            <h1 class="text-2xl font-extrabold text-primary">Phong Hub</h1>
-            <button data-action="toggle-menu" class="text-white focus:outline-none p-2 rounded-lg hover:bg-gray-700">
-                <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
-                </svg>
-                <svg id="menu-icon-close" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </header>
-
-
-        <!-- Sidebar -->
-        <nav id="sidebar" class="sidebar md:w-64 w-64 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40 p-4 flex flex-col md:shadow-none shadow-xl">
-            <h1 class="text-3xl font-extrabold text-primary mb-6 hidden md:block">Phong Hub</h1>
-            
-            <!-- Menu links -->
-            <div id="nav-links" class="flex flex-col space-y-2 pb-4 flex-grow custom-scrollbar overflow-y-auto">
-                <!-- Navigation links will be rendered here -->
-            </div>
-
-            <!-- Thêm phần Giới Thiệu cố định ở cuối -->
-            <div class="pt-6 border-t border-gray-700 mt-auto">
-                <h4 class="text-sm font-semibold text-gray-500 mb-1">Created by:</h4>
-                <p class="text-sm text-gray-400">phongYTB</p>
-                <a href="https://tiktok.com/@hnphong_anime" target="_blank" class="text-sm text-primary hover:text-primary-dark transition">
-                    TikTok: hnphong_anime
-                </a>
-            </div>
+    <!-- Header & Navigation -->
+    <header class="bg-gray-900 p-4 shadow-xl sticky top-0 z-20">
+        <h1 class="text-3xl font-extrabold gradient-text">PHONG HUB <span class="text-sm text-gray-500">DEV</span></h1>
+        <nav class="mt-2 space-x-2 flex">
+            <button onclick="showPage('encryption')" class="nav-link active" id="navEncryption">MÃ HÓA</button>
+            <button onclick="showPage('script')" class="nav-link" id="navScript">SCRIPT HUB</button>
+            <button onclick="showPage('client')" class="nav-link" id="navClient">CLIENT/APK</button>
+            <button onclick="showPage('about')" class="nav-link" id="navAbout">GIỚI THIỆU</button>
         </nav>
+    </header>
 
-        <!-- Main Content -->
-        <main id="main-content" class="flex-grow p-4 md:p-8 w-full">
-            <!-- Nội dung sẽ được render tại đây ngay lập tức -->
-        </main>
-    </div>
+    <!-- Main Content Container -->
+    <main class="p-4 md:p-8 max-w-6xl mx-auto space-y-10">
 
-    <!-- Script Block -->
-    <script type="module">
-        // --- FIREBASE IMPORTS (RẤT DỄ BỊ CHẶN) ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, addDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        setLogLevel('Debug');
+        <!-- 1. MÃ HÓA (ENCRYPTION) PAGE -->
+        <section id="encryptionPage" class="page-content space-y-8">
+            <h2 class="text-4xl font-extrabold text-center text-pink-400">Công Cụ Mã Hóa Đa Năng</h2>
+            
+            <!-- Encryption Tool Card -->
+            <div class="card">
+                <div class="flex flex-col md:flex-row md:space-x-4 mb-4 items-center">
+                    <div class="w-full md:w-1/3 mb-4 md:mb-0">
+                        <label for="encryptionType" class="block mb-2 font-medium text-gray-300">Chọn Loại Mã Hóa:</label>
+                        <select id="encryptionType" class="input-style bg-gray-900">
+                            <option value="base64">Base64</option>
+                            <option value="hex">Hexadecimal</option>
+                            <option value="rot13">ROT13 Cipher</option>
+                            <option value="aes">AES (Key Mặc định: Roland)</option>
+                        </select>
+                    </div>
+                    <div class="w-full md:w-2/3">
+                        <label for="aesKey" class="block mb-2 font-medium text-gray-300">Key AES (Chỉ dùng cho AES):</label>
+                        <input type="text" id="aesKey" value="Roland" class="input-style" placeholder="Mặc định là Roland">
+                    </div>
+                </div>
 
-        // --- GLOBAL STATE & ENVIRONMENT VARIABLES ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let db, auth, userId; 
+                <!-- Input/Output Areas -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="plainText" class="block mb-2 font-medium text-gray-300">Văn bản Gốc / Mã hóa</label>
+                        <textarea id="plainText" rows="6" class="input-style" placeholder="Nhập văn bản vào đây..."></textarea>
+                    </div>
+                    <div>
+                        <label for="resultText" class="block mb-2 font-medium text-gray-300">Kết quả</label>
+                        <textarea id="resultText" rows="6" class="input-style" readonly placeholder="Kết quả sẽ hiển thị ở đây..."></textarea>
+                    </div>
+                </div>
 
-        const APP_STATE = {
-            view: 'gioi-thieu', 
-            encryption: {
-                key: "Roland",
-            },
-            keyPremium: {
-                isValid: false, 
-                currentUserUUID: crypto.randomUUID(), 
-            },
-            scripts: {
-                currentCategory: 'brainrot',
-                searchQuery: '', 
-            },
-        };
+                <!-- Action Buttons -->
+                <div class="flex space-x-4 mt-6">
+                    <button onclick="handleEncryptDecrypt(true)" class="btn-primary flex-1">
+                        MÃ HÓA
+                    </button>
+                    <button onclick="handleEncryptDecrypt(false)" class="btn-primary flex-1 bg-teal-600 hover:bg-teal-700">
+                        GIẢI MÃ
+                    </button>
+                    <button onclick="copyTextareaContent('resultText', this)" id="copyResultBtn" class="btn-copy bg-gray-500 hover:bg-gray-600">
+                        Sao Chép
+                    </button>
+                </div>
+            </div>
 
-        const ENCRYPTION_SECRET_KEY = APP_STATE.encryption.key;
-        const ADMIN_KEY = 'adminphong'; 
-        const TIKTOK_URL = 'https://tiktok.com/@hnphong_anime'; // Link TikTok cố định
-        
-        // --- DATA BỘ DỮ LIỆU CỨNG ---
-        const ENCRYPTION_TYPES = [
-            { id: 'base64', name: 'Base64 (Mã hóa cơ bản)' },
-            { id: 'url', name: 'URL Encoding (Mã hóa Web)' },
-            { id: 'caesar', name: 'Caesar Cipher (Dịch 3 ký tự)' },
-            { id: 'aes', name: 'AES (Mật mã Mạnh - Key: Roland)' },
-        ];
-        
-        const SCRIPT_DATA = { 
-            brainrot: [
+            <!-- HIDDEN CONTENT AREA (EASTER EGG) -->
+            <div id="hiddenContent" class="card hidden border-4 border-double border-red-500 p-8">
+                <h3 class="text-3xl font-extrabold text-center text-yellow-400 mb-6 border-b pb-3">TRANG NỘI BỘ - MẬT KHẨU ĐÃ ĐƯỢC CHẤP NHẬN</h3>
+                
+                <p class="text-xl font-bold text-center mb-6 text-cyan-300">
+                    DOANH NGHIỆP XI MĂNG HÀNG ĐẦU VIỆT NAM: XI MĂNG HOA CƯƠNG
+                </p>
+
+                <h4 class="text-2xl font-bold text-red-400 mb-4">VĂN BẢN DIỄN THUYẾT VỀ THẦY ĐỨC (The Good-Hearted Teacher)</h4>
+                <p class="text-lg leading-relaxed text-gray-300 italic">
+                    "Thầy Đức" không chỉ là một danh xưng, mà là một biểu tượng của sự tận tâm và trí tuệ trong lòng nhiều thế hệ học trò. Thầy là người truyền lửa, không chỉ bằng kiến thức hàn lâm mà còn bằng chính nhân cách sáng ngời của mình. Mỗi bài giảng của Thầy đều là một hành trình khám phá, biến những công thức khô khan, những sự kiện lịch sử phức tạp thành những câu chuyện sống động, dễ hiểu. Thầy không bao giờ đặt nặng áp lực điểm số, mà luôn khuyến khích chúng tôi tìm thấy niềm vui trong học tập, trong việc tự mình giải mã những bí ẩn của thế giới.
+                </p>
+                <p class="text-lg leading-relaxed text-gray-300 italic mt-4">
+                    Trong lớp học, Thầy Đức giống như một nhạc trưởng tài ba, dẫn dắt học sinh bằng sự kiên nhẫn vô bờ bến. Thầy luôn lắng nghe mọi câu hỏi, dù là ngây ngô nhất, và trả lời bằng một thái độ tôn trọng tuyệt đối. Thầy dạy chúng tôi về đạo đức, về sự trung thực, về lòng nhân ái—những bài học quý giá mà sách vở không thể nào truyền đạt hết. Thầy tin rằng mỗi học sinh đều là một viên ngọc thô, và nhiệm vụ của Thầy là giúp viên ngọc ấy tỏa sáng theo cách riêng của nó.
+                </p>
+                <p class="text-lg leading-relaxed text-gray-300 italic mt-4">
+                    Ngày nay, dù đã trưởng thành và bước đi trên nhiều con đường khác nhau, hình ảnh Thầy Đức vẫn luôn in đậm trong tâm trí chúng tôi như một ngọn hải đăng. Thầy là minh chứng sống cho thấy một người thầy vĩ đại không chỉ cần có tài năng, mà còn phải có một trái tim bao dung. Thầy đã gieo mầm tri thức, nuôi dưỡng ước mơ, và khắc họa nên những phẩm chất tốt đẹp nhất trong chúng tôi. Thầy Đức, người thầy của mọi thế hệ, người đã dùng cả cuộc đời mình để xây đắp tương lai cho biết bao học trò.
+                </p>
+                <p class="mt-8 text-right font-black text-2xl text-purple-400">by phong</p>
+            </div>
+        </section>
+
+        <!-- 2. SCRIPT HUB PAGE -->
+        <section id="scriptPage" class="page-content hidden space-y-8">
+            <h2 class="text-4xl font-extrabold text-center text-yellow-400">Script Hub - Cập Nhật Liên Tục</h2>
+
+            <!-- Game Selection Tabs -->
+            <div class="flex justify-center space-x-4 mb-6">
+                <button onclick="showScriptGame('steal')" id="tabSteal" class="btn-primary active bg-pink-600 hover:bg-pink-700">
+                    Steal a Brainrot
+                </button>
+                <button onclick="showScriptGame('garden')" id="tabGarden" class="btn-primary bg-gray-600 hover:bg-green-700">
+                    Grow a Garden
+                </button>
+            </div>
+
+            <!-- Script List Container -->
+            <div id="scriptContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Scripts are rendered here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- 3. CLIENT / APK PAGE -->
+        <section id="clientPage" class="page-content hidden space-y-8">
+            <h2 class="text-4xl font-extrabold text-center text-teal-400">Client / APK Mod Manager</h2>
+
+            <div id="apkContainer" class="space-y-6">
+                <!-- APK list rendered here by JavaScript -->
+            </div>
+            
+            <p class="text-sm text-center text-gray-500 mt-8">
+                Lưu ý: Các liên kết được cung cấp từ các nguồn bên ngoài, Phong Hub không chịu trách nhiệm về nội dung của chúng.
+            </p>
+        </section>
+
+        <!-- 4. GIỚI THIỆU (ABOUT) PAGE -->
+        <section id="aboutPage" class="page-content hidden space-y-8">
+            <h2 class="text-4xl font-extrabold text-center text-purple-400">Giới Thiệu & Điều Khoản Sử Dụng</h2>
+            
+            <div class="card p-8 space-y-6">
+                <div class="text-center">
+                    <p class="text-xl font-bold text-cyan-300">Created by <span class="text-3xl font-black">phongYTB</span></p>
+                    <p class="text-lg font-medium mt-2 text-gray-400">Theo dõi tôi trên:</p>
+                    <a href="https://www.tiktok.com/@hnphong_meobeo" target="_blank" class="text-2xl font-extrabold text-pink-500 hover:text-pink-400 transition">
+                        Tiktok: hnphong_meobeo
+                    </a>
+                </div>
+
+                <div class="border-t border-gray-700 pt-6">
+                    <h3 class="text-2xl font-bold text-red-400 mb-3">Điều Khoản Sử Dụng (T&C)</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-300 text-sm">
+                        <li><strong>Bản quyền:</strong> Mọi nội dung, công cụ, và mã nguồn (trừ các script công khai) thuộc về phongYTB. Sao chép mà không được phép là vi phạm.</li>
+                        <li><strong>Trách nhiệm:</strong> Phong Hub cung cấp các công cụ và script chỉ với mục đích giáo dục và nghiên cứu. Người dùng phải tự chịu trách nhiệm về mọi hành động của mình khi sử dụng các script và client này.</li>
+                        <li><strong>Bảo mật:</strong> Chúng tôi cam kết không thu thập dữ liệu cá nhân của người dùng trên trang web tĩnh này.</li>
+                        <li><strong>Chỉnh sửa:</strong> Điều khoản có thể được cập nhật bất cứ lúc nào mà không cần thông báo trước.</li>
+                        <li><strong>Key Mặc Định AES:</strong> Key mã hóa AES mặc định là **'Roland'**. Việc này nhằm đơn giản hóa quá trình trao đổi dữ liệu giữa các thành viên.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- 0. DATA STRUCTURES (Bảo toàn dữ liệu cũ) ---
+        const scriptData = {
+            'Steal a Brainrot': [
                 { name: "Lemon Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/ffdfeadf0af798741806ea404682a938.lua"))()' },
                 { name: "Arbix Hub New", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()' },
-                { name: "Blue X Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/main/Main.lua"))()' },
-                { name: "Eclipse Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Fauzi145/V-Hub/main/Eclipse.lua"))()' },
-                { name: "Nexuz Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NexuzHub/NexuzHub/main/Loading.lua"))()' },
-                { name: "Venom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/VenomHub-Script/loader/main/load.lua"))()' },
-                { name: "Huz Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/HuzHub/Hub/main/main.lua"))()' },
-                { name: "Void Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Void-Scripts/Void-Hub/main/Loader.lua"))()' },
-                { name: "Fluxus Hub", script: 'loadstring(game:HttpGet("https://fluxus.vn/loader.lua"))()' },
-                { name: "Hydra Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Hydra-Scripts/Loader/main/loader.lua"))()' },
-                { name: "Ope Ope Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Ope-Ope-No-Mi/Ope-Ope-No-Mi/main/Loader.lua"))()' },
-                { name: "Aimbot", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Aimbot-Script/Loader/main/load.lua"))()' },
-                { name: "Script X", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptX-Script/Loader/main/load.lua"))()' },
-                { name: "Vibe Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/VibeHub-Script/Loader/main/load.lua"))()' },
-                { name: "Project X", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ProjectX-Script/Loader/main/load.lua"))()' },
-                { name: "Zenith Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithHub-Script/Loader/main/load.lua"))()' },
-                { name: "Inferno Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernoHub-Script/Loader/main/load.lua"))()' },
-                { name: "Phantom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/PhantomHub-Script/Loader/main/load.lua"))()' },
-                { name: "Nova Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NovaHub-Script/Loader/main/load.lua"))()' },
-                { name: "Galaxy Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/GalaxyHub-Script/Loader/main/load.lua"))()' },
+                { name: "Blue X Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BlueX/BlueX-Hub/refs/heads/main/Main.lua"))()' },
+                { name: "Dencrycode", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()' },
+                { name: "Ugly Hub", script: 'script_key="Your_Key";\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/77d72e34c893b67ea49b8d62d1a18485.lua"))()' },
+                { name: "Lumin Hub", script: 'loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()' },
+                { name: "Tuấn Anh IOS", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhTuanDzai-Hub/TuanAnhIOS/refs/heads/main/BrainRotVip"))()' },
+                { name: "Steel A Mod", script: 'loadstring(game:HttpGet("https://rawscripts.net/raw/Steal-a-Brainrot-MODDED-INSTANT-STEALS-EASY-CASH-AND-MORE-KEYLESS-42520"))()' },
+                { name: "Chilli Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()' },
+                { name: "Steel a Brainnot", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Estevansit0/KJJK/refs/heads/main/PusarX-loader.lua"))()' },
+                { name: "Vakat Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vokamc/main/refs/heads/main/vokathub"))()' },
+                { name: "Open GUI", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/iw929wiwiw/Teleport-Speed/refs/heads/main/Fall%20Down"))()' },
+                { name: "Makal Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/DoliScriptz/loader/refs/heads/main/main.lua", true))()' },
+                { name: "Arbix Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Instant%20steal.lua"))()' },
+                { name: "Xxlegendxx", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Akbar123s/Script-Roblox-/refs/heads/main/nabaruBrainrot"))()' },
+                { name: "Delfi Hub", script: 'loadstring(game:HttpGet("https://pastefy.app/eCzs7DNQ/raw"))()' },
+                { name: "Ronix Hub", script: 'loadstring(game:HttpGet("pastebin.com/raw/HFx6faQY"))()' },
+                { name: "AvOnTop Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Ayvathion/AV-On-Top/refs/heads/main/Loader.lua"))()' },
+                { name: "Lurk Hack", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/lurkhackv4/refs/heads/main/main.lua"))()' },
+                { name: "Timmy Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/WinzeTim/timmyhack2/refs/heads/main/stealabrainrot.lua"))()' },
             ],
-            garden: [
+            'Grow a Garden': [
                 { name: "ThundeZ Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ThundarZ/Welcome/refs/heads/main/Main/GaG/Main.lua"))()' },
-                { name: "Infinity Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Infinity-Script/GaG/main/Load.lua"))()' },
-                { name: "Dinga Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Dingarik/Dingarik/refs/heads/main/GrowAGarden"))()' },
-            ]
-        };
-
-        const CLIENT_DATA = [
-            { name: "Delta X VNG", update: "23/09/2025", status: "Hoạt Động", version: "V2.690", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
-            { name: "Fluxus Client (Tool)", update: "20/09/2025", status: "Tool", version: "V6.5", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
-            { name: "KRNL Client", update: "10/09/2025", status: "Hoạt Động", version: "V1.0", antiBan: "Không", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
-            { name: "Executor Pro", update: "01/10/2025", status: "Bảo Trì", version: "V3.2", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
-            { name: "GameGuardian Mod", update: "15/09/2025", status: "Hoạt Động", version: "V9.9", antiBan: "Có", link: "https://www.mediafire.com/file/sr0uoqc0cfqmv4r/Delta_Vng-2.690.721_Up.apk/file" },
-        ];
-
-        const ACCOUNT_DATA = [
-            { price: '50k', game: 'FF Random', image: 'https://placehold.co/150x250/22c55e/ffffff?text=FF+50K', details: 'Acc Free Fire ngẫu nhiên.' },
-            { price: '100k', game: 'FF VIP', image: 'https://placehold.co/150x250/ef4444/ffffff?text=FF+VIP', details: 'Acc Free Fire có súng VIP.' },
-            { price: '20k', game: 'LQ Random', image: 'https://placehold.co/150x250/3b82f6/ffffff?text=LQ+20K', details: 'Acc Liên Quân ngẫu nhiên.' },
-            { price: '150k', game: 'LQ Rank Cao', image: 'https://placehold.co/150x250/f97316/ffffff?text=LQ+150K', details: 'Acc Liên Quân rank Cao Thủ.' },
-            { price: '30k', game: 'Roblox Random', image: 'https://placehold.co/150x250/6d28d9/ffffff?text=RBX+30K', details: 'Acc Roblox có gamepass.' },
-            { price: '80k', game: 'Minecraft Key', image: 'https://placehold.co/150x250/14b8a6/ffffff?text=MC+80K', details: 'Key Minecraft bản quyền.' },
-            { price: '500k', game: 'FF Max Option', image: 'https://placehold.co/150x250/dc2626/ffffff?text=FF+MAX', details: 'Acc Free Fire full tướng, skin hiếm.' },
-            { price: '120k', game: 'Blox Fruit Acc', image: 'https://placehold.co/150x250/fbbf24/ffffff?text=BF+120K', details: 'Acc Blox Fruit có trái hiếm.' },
-        ];
-
-
-        // --- ENCRYPTION/DECRYPTION LOGIC (Chức năng Mã Hóa) ---
-
-        const caesarCipher = (text, shift, mode) => {
-            const finalShift = mode === 'encrypt' ? shift : -shift;
-            return text.split('').map(char => {
-                const code = char.charCodeAt(0);
-                if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
-                    const base = (code >= 65 && code <= 90) ? 65 : (code >= 97 && code <= 122) ? 97 : 48;
-                    const wrap = (code >= 48 && code <= 57) ? 10 : (code <= 90 ? 26 : 26);
-                    
-                    let newCode = code - base;
-                    newCode = (newCode + finalShift) % wrap;
-                    
-                    if (newCode < 0) {
-                        newCode += wrap;
-                    }
-                    return String.fromCharCode(newCode + base);
-                }
-                return char; 
-            }).join('');
-        };
-
-        const encodeDecode = (text, type, mode) => {
-            if (!text) return '';
-
-            try {
-                switch (type) {
-                    case 'base64':
-                        if (mode === 'encrypt') {
-                            // Mã hóa Base64 an toàn cho Unicode (tiếng Việt)
-                            return btoa(unescape(encodeURIComponent(text))); 
-                        } else {
-                            // Giải mã Base64 an toàn cho Unicode (tiếng Việt)
-                            return decodeURIComponent(escape(atob(text)));
-                        }
-                    case 'url':
-                        return mode === 'encrypt' ? encodeURIComponent(text) : decodeURIComponent(text);
-                    case 'caesar':
-                         return caesarCipher(text, 3, mode);
-                    case 'aes':
-                        if (typeof CryptoJS === 'undefined') {
-                             return 'Lỗi: Thư viện AES (CryptoJS) bị chặn tải. Vui lòng chạy file HTML cục bộ.';
-                        }
-                        if (mode === 'encrypt') {
-                            return CryptoJS.AES.encrypt(text, ENCRYPTION_SECRET_KEY).toString();
-                        } else {
-                            const bytes = CryptoJS.AES.decrypt(text, ENCRYPTION_SECRET_KEY);
-                            if (!bytes.sigBytes || bytes.sigBytes === 0) {
-                                return 'Lỗi: Key AES sai hoặc dữ liệu không hợp lệ.';
-                            }
-                            const result = bytes.toString(CryptoJS.enc.Utf8);
-                            return result || 'Lỗi: Giải mã thành công nhưng kết quả rỗng.';
-                        }
-                    default:
-                        return 'Lỗi: Loại mã hóa không hợp lệ.';
-                }
-            } catch (e) {
-                return `Lỗi xử lý: ${e.message}. Dữ liệu không hợp lệ cho loại mã hóa/giải mã này.`;
-            }
-        };
-
-        // --- FIREBASE INITIALIZATION & ACCESS LOGGING (DỄ BỊ CHẶN) ---
-
-        async function initializeFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase config is missing. Cannot initialize Firestore.");
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                    } else {
-                        userId = crypto.randomUUID(); 
-                    }
-                    await logAccess();
-                });
-
-            } catch (error) {
-                console.warn("Firebase Init/Auth Error: Có thể bị chặn tải.");
-                userId = crypto.randomUUID();
-                return;
-            }
-        }
-
-        async function fetchDeviceInfo() {
-            const mockIP = `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
-            
-            return {
-                ip: mockIP,
-                userAgent: navigator.userAgent,
-                screen: `${window.screen.width}x${window.screen.height}`,
-                platform: navigator.platform
-            };
-        }
-
-        async function logAccess() {
-            if (!db || !userId) return;
-
-            const logsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'access_logs');
-            
-            try {
-                const deviceInfo = await fetchDeviceInfo();
-                
-                await addDoc(logsCollectionRef, {
-                    timestamp: new Date().toISOString(),
-                    userId: userId,
-                    ip: deviceInfo.ip, 
-                    userAgent: deviceInfo.userAgent,
-                    device: `${deviceInfo.platform} (${deviceInfo.screen})`,
-                });
-                console.log("Access logged successfully (Firebase).");
-            } catch (e) {
-                console.error("Error logging access (LỖI GHI FIREBASE):", e);
-            }
-        }
-
-
-        // --- COMMON UI FUNCTIONS & MENU LOGIC ---
-
-        const mainContent = document.getElementById('main-content');
-        const navLinks = document.getElementById('nav-links');
-        const modal = document.getElementById('custom-modal');
-        const sidebar = document.getElementById('sidebar');
-        const menuIconOpen = document.getElementById('menu-icon-open');
-        const menuIconClose = document.getElementById('menu-icon-close');
-        
-        let isMenuOpen = false;
-
-        const toggleMenu = () => {
-            isMenuOpen = !isMenuOpen;
-            if (isMenuOpen) {
-                sidebar.classList.remove('-translate-x-full');
-                menuIconOpen.classList.add('hidden');
-                menuIconClose.classList.remove('hidden');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                menuIconOpen.classList.remove('hidden');
-                menuIconClose.classList.add('hidden');
-            }
-        }
-
-        const showModal = (title, content, actionsHtml = '') => {
-            document.getElementById('modal-title').innerText = title;
-            documen
+                { name: "Auto Tự Động Chơi", script: 'loadstring(game:HttpGet("https://pastefy.app/OT23uo9U/raw"))()' },
+                { name: "Speed Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua"))()' },
+                { name: "Nat Hub", script: 'loadstring(game:HttpGet("https://get.nathub.xyz/loader"))()' },
+                { name: "OMG Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua"))()' },
+                { name: "Lumin Hub", script: 'loadstring(game:HttpGet("https://lumin-hub.lol/loader.lua"))()' },
+                { name: "Ransom Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/imFiftyyOne/RansomHub/refs/heads/main/Gag"))()' },
+                { name: "No-Lag V2 Hub", script: 'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3b2169cf53bc6104dabe8e19562e5cc2.lua"))()' },
+                { name: "No-Lag V1 Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/NoLag-id/No-Lag-HUB/refs/heads/main/Loader/LoaderV1.lua"))()' },
+                { name: "Moma Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/n3xkxp3rl/Moma-Hub/refs/heads/main/GrowAGarden.lua"))()' },
+                { name: "Thunder Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ThundarZ/Welcome/refs/heads/main/Main/GaG/Main.lua"))()' },
+                { name: "PhantFluxReal", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/sudaisontopxd/PanScriptXSudaisScript/refs/heads/main/PhantFluxReal.lua"))()' },
+                { name: "Kura Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/checkurasshole/Script/refs/heads/main/IQ"))()' },
+                { name: "Tora Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/GrowaGarden"))()' },
+                { name: "Lion Hub Kaitun", script: 'loadstring(game:HttpGet("https://pastefy.app/KAZUgCRO/raw"))()' },
+                { name: "AVOnTop", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Ayvathion/AV-On-Top/refs/heads/main/Loader.lua"))()' },
+                { name: "Tbao Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/game/refs/heads/main/TbaoHubGrowGarden"))()' },
+                { name: "Y Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/yue-os/script/refs/heads/main/Y-Hub"))()' },
+                { name: "Galactic Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/GalacticScripts/Galactic-Hub/refs/heads/main/Galactic%20Hub"))()' },
+                { name: "Beecon Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()' },
+                { name: "Kenniel Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Kenniel123/Grow-a-garden/refs/heads/main/Grow%20A%20Garden"))()' },
+                { name: "Gag Dupe Hub", script: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Bern0va/Scripts/refs/heads/main/gag-dupe.lua"))()' },
+                { name: "Blue Hub", script: 'lo
